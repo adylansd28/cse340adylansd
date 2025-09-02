@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("../partials/head", { title: typeof title !== "undefined" ? title : "CSE 340 App" }) %>
+  <body>
+    <%- include("../partials/header") %>
+    <%- include("../partials/nav") %>
+    <main>
+      <%- body %>
+    </main>
+    <%- include("../partials/footer") %>
+  </body>
+</html>
