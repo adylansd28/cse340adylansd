@@ -1,6 +1,82 @@
-/******* Change Box Model ***************/
-*,
-*:before,
-*:after {
-  box-sizing: border-box;
+:root{
+  --bg:#ffffff;
+  --ink:#171717;
+  --brand:#2a2a73;      /* nav/brand dark */
+  --brand-ink:#ffffff;  /* text on brand */
+  --accent:#0aa0c8;     /* button */
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.5}
+
+.container{max-width:1100px;margin-inline:auto;padding:0 1rem}
+
+/* Skip link */
+.skip-link{position:absolute;left:-9999px;top:auto}
+.skip-link:focus{left:1rem;top:1rem;background:#fff;color:#000;padding:.5rem .75rem;border:2px solid #000;z-index:10}
+
+/* Header */
+#top-header { padding: 1rem 0; }
+#top-header > .container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.siteName a{color:var(--ink);text-decoration:none;font-weight:800;font-size:1.6rem}
+.tools a{color:var(--ink);text-decoration:none;font-weight:600}
+
+/* Nav */
+.nav-bar{ background: var(--brand); }
+
+.nav-bar > .container{
+  max-width: 1100px; 
+  margin-inline: auto;
+  padding: 0 1rem;      
+}
+
+.nav-bar ul{
+  list-style: none;
+  margin: 0;
+  padding: .25rem 0;       
+  display: flex;
+  gap: .5rem;
+  overflow-x: auto;
+}
+
+.nav-bar a{
+  display: block;
+  padding: .6rem 1rem;
+  color: var(--brand-ink);
+  text-decoration: none;
+  border-radius: .4rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nav-bar a.active,
+.nav-bar a:hover{ background: rgba(255,255,255,.15); }
+
+/* Hero */
+.hero{display:grid;gap:1rem;align-items:center;padding:1rem 0}
+.hero-copy h2{margin:.2rem 0 1rem}
+.car-name{color:#0b70d1;margin:.4rem 0}
+.car-bullets{margin:.2rem 0 .8rem 1.2rem}
+.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:.6rem 1rem;border-radius:.5rem;font-weight:700}
+.hero-img{width:100%;height:auto;max-width:560px;justify-self:center}
+
+/* Two-column area (stacks on mobile) */
+.two-col{display:grid;gap:2rem;padding:1rem 0}
+.reviews{padding-left:1.2rem}
+.upgrades{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.upgrades figure{margin:0;background:#e7f7fb;border-radius:.6rem;padding:.6rem;text-align:center}
+.upgrades img{max-width:100%;height:auto;display:block;margin:0 auto .5rem}
+.upgrades a{text-decoration:underline;color:#005b87;font-weight:600}
+
+/* Footer */
+footer{padding:2rem 0;border-top:1px solid #e5e5e5;color:#555}
+
+/* Desktop layout */
+@media (min-width: 900px){
+  .hero{grid-template-columns:1.2fr .8fr}
+  .two-col{grid-template-columns:1fr 1fr;align-items:start}
 }
