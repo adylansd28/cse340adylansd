@@ -1,0 +1,23 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": true
+                }
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "sshOptions": {
+                "port": 5432,
+                "host": "postgresql://cse340adylansd:5yAgfdpg-d2rm3b6mcj7s73essrdg-a.oregon-postgres.render.com",
+                "username": "cse340adylansd",
+                "password": "5yAgf4LY3lwBPmnHV18gVXGVlhZyRT9K"
+            },
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "name": "cse340_render.com",
+            "connectString": "postgresql://cse340adylansd:5yAgf4LY3lwBPmnHV18gVXGVlhZyRT9K@dpg-d2rm3b6mcj7s73essrdg-a.oregon-postgres.render.com/cse340adylansd"
+        }
+    ]
+}
