@@ -1,3 +1,4 @@
+/* === Design tokens === */
 :root{
   --bg:#ffffff;
   --ink:#171717;
@@ -6,6 +7,7 @@
   --accent:#075985;
 }
 
+/* === Base reset === */
 *{ box-sizing:border-box }
 
 html, body{
@@ -18,6 +20,7 @@ html, body{
   overflow-x:hidden;
 }
 
+/* Background checkerboard only on large screens */
 @media (min-width:1024px){
   body{
     background-image:url('/images/site/checkerboard.jpg');
@@ -28,24 +31,28 @@ html, body{
   }
 }
 
+/* === Layout helpers === */
 .container{ max-width:1100px; margin-inline:auto; padding:0 1rem }
-
 body{ min-height:100dvh; display:flex; flex-direction:column; align-items:stretch }
 main{ flex:1 0 auto }
 footer{ margin-top:auto }
 
+/* Skip link for accessibility */
 .skip-link{ position:absolute; left:-9999px; top:auto }
 .skip-link:focus{ left:1rem; top:1rem; background:#fff; color:#000; padding:.5rem .75rem; border:2px solid #000; z-index:10 }
 
+/* === Header / brand === */
 #top-header{ padding:1rem 0; background:#fff }
 #top-header > .container{ display:flex; align-items:center; justify-content:space-between }
 .siteName a{ color:var(--ink); text-decoration:none; font-weight:800; font-size:1.6rem }
 .tools a{ color:var(--ink); text-decoration:none; font-weight:600 }
 
+/* === Top nav === */
 .nav-bar{ background:var(--brand) }
+.nav-bar > .container{ padding-left:0; padding-right:1rem }
 .nav-bar ul{
   list-style:none; margin:0; padding:.25rem 0;
-  display:flex; gap:.5rem 1rem; flex-wrap:wrap; overflow-x:visible;
+  display:flex; gap:.5rem 1rem; flex-wrap:wrap;
 }
 .nav-bar a{
   display:block; padding:.6rem 1rem; color:var(--brand-ink);
@@ -53,42 +60,129 @@ footer{ margin-top:auto }
   white-space:normal; outline-offset:2px;
 }
 .nav-bar a:focus-visible{ outline:2px solid #ffffff80 }
-.nav-bar a.active, .nav-bar a:hover{ background:rgba(255,255,255,.15) }
+.nav-bar a.active, .nav-bar a:hover{ background:rgba(255,255,255,.25) } /* better contrast */
 
-main, footer.container, .hero, .two-col{
-  background:#fff; padding:1rem; box-shadow:none;
-}
-
-main.container, footer.container{
-  width:100%;
-  max-width:1100px;
-  margin-inline:auto;
-}
+/* === Page blocks === */
+main, footer.container, .hero, .two-col{ background:#fff; padding:1rem; box-shadow:none }
+main.container, footer.container{ width:100%; max-width:1100px; margin-inline:auto }
 
 .hero{ display:grid; gap:1rem; align-items:center; padding:1rem 0 }
 .hero-copy h2{ margin:.2rem 0 1rem }
 .car-name{ color:#0b70d1; margin:.4rem 0 }
 .car-bullets{ margin:.2rem 0 .8rem 1.2rem }
 
+/* === Generic button === */
 .btn{
   display:inline-block; background:var(--accent); color:#fff; text-decoration:none;
   padding:.6rem 1rem; border-radius:.5rem; font-weight:700; border:none;
 }
 .btn:hover,.btn:focus-visible{ filter:brightness(1.1); outline:2px solid #ffffff66; outline-offset:2px }
 
+/* Danger button variant (footer “Cause Error”) */
+.btn-danger{ background-color:#b91c1c }
+.btn-danger:hover, .btn-danger:focus-visible{
+  background-color:#dc2626;
+  filter:brightness(1.05);
+  outline:2px solid #ffffff66;
+  outline-offset:2px;
+}
+
+/* Media defaults */
 .hero-img{ width:100%; height:auto; max-width:560px; justify-self:center }
 img, video, svg, canvas, table{ max-width:100%; height:auto; display:block }
 a, p, li{ overflow-wrap:anywhere }
 
+/* === Home blocks === */
 .two-col{ display:grid; gap:2rem; padding:1rem 0 }
 .reviews{ padding-left:1.2rem }
 .upgrades{ display:grid; grid-template-columns:1fr 1fr; gap:1rem }
 .upgrades figure{ margin:0; background:#e7f7fb; border-radius:.6rem; padding:.6rem; text-align:center }
 .upgrades img{ max-width:100%; height:auto; display:block; margin:0 auto .5rem }
-.upgrades a{ text-decoration:underline; color:#005b87; font-weight:600 }
 
-.nav-bar > .container{ padding-left:0; padding-right:1rem }
+/* Upgrades links without underline by default (keep underline on hover/focus) */
+.upgrades a{
+  text-decoration:none;
+  color:#005b87;
+  font-weight:600;
+  display:inline-block;
+}
+.upgrades a:hover, .upgrades a:focus-visible{ text-decoration:underline }
 
+/* === Vehicle Detail (detail.ejs) === */
+.vehicle-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-start; /* already ensures top alignment */
+  margin: 2rem auto;
+  max-width: 1200px;
+}
+.vehicle-detail__media{ flex:1 1 420px; min-width:280px }
+.vehicle-detail__media img{ max-width:100%; height:auto; border-radius:8px }
+.vehicle-detail__content {
+  flex: 1 1 360px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* force top alignment with image */
+}
+.vehicle-detail__title {
+  font-size: 1.75rem;
+  margin: 0 0 1rem; /* reset top margin to 0 */
+}
+.vehicle-detail__price{ font-size:1.5rem; font-weight:bold; color:#004080; margin-bottom:1rem }
+.vehicle-detail__miles, .vehicle-detail__color, .vehicle-detail__class, .vehicle-detail__desc{ margin:.5rem 0 }
+
+/* === Classification Grid (generated via buildClassificationGrid) === */
+#inv-display{
+  list-style:none; padding:0; margin:1.25rem 0 0;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+  gap:1rem;
+}
+#inv-display li{
+  background:#fff; border:1px solid #e5e7eb; border-radius:14px;
+  padding:0; /* image edge-to-edge; text box handles its own padding */
+  display:grid; gap:.6rem;
+  transition:box-shadow .2s ease, transform .12s ease;
+  overflow:hidden;
+}
+#inv-display li:hover{ box-shadow:0 10px 24px rgba(2,6,23,.08); transform:translateY(-2px) }
+#inv-display img{
+  width:100%; height:164px; object-fit:cover; border-radius:10px; /* inner radius for smooth corners */
+}
+#inv-display h2{
+  font-size:1rem; margin:0; padding:0; line-height:1.2;
+}
+#inv-display h2 a{
+  color:#0b70d1; text-decoration:none; font-weight:600;
+}
+#inv-display h2 a:hover, #inv-display h2 a:focus-visible{ text-decoration:underline }
+
+/* Text box under image (roomier and balanced with price) */
+#inv-display .namePrice{
+  display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+  padding:.75rem 1rem;            /* inner left/right spacing */
+  min-height:60px;                 /* taller text area (“cajón”) */
+  background:#fff;
+  border-top:1px solid #e5e7eb;
+  border-radius:0 0 10px 10px;
+}
+#inv-display .namePrice hr{ display:none } /* hide original HR */
+#inv-display .namePrice span{
+  font-weight:700; color:#111827; font-size:.9rem; white-space:nowrap; /* smaller price, no wrap */
+}
+
+/* === Error pages (404 / 500) === */
+.error-page{ text-align:center; padding:2rem }
+.error-page h1{ font-size:2rem; color:#c00 }
+.error-page p{ margin:1rem 0 }
+.error-page .btn{
+  display:inline-block; margin-top:1rem; padding:.75rem 1.25rem;
+  background-color:#004080; color:#fff; text-decoration:none; border-radius:6px;
+}
+.error-page .btn:hover{ background-color:#0066cc }
+
+/* === Responsive tweaks === */
 @media (min-width:900px){
   .hero{ grid-template-columns:1.2fr .8fr }
   .two-col{ grid-template-columns:1fr 1fr; align-items:start }
@@ -96,3 +190,10 @@ a, p, li{ overflow-wrap:anywhere }
   .hero-img{ justify-self:start; margin-left:-30px }
 }
 
+@media (max-width:768px){
+  .vehicle-detail{ flex-direction:column }
+}
+
+@media (max-width:480px){
+  #inv-display{ grid-template-columns:1fr }
+}
