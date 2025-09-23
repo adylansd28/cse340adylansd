@@ -199,6 +199,17 @@ ul.notice li, ul.error li {
 ul.notice { background: #eef6ff; }
 ul.error  { background: #fee2e2; }
 
+#login-view.narrow { max-width: 480px; margin: 2rem auto; }
+#login-view .field { display: grid; gap: .4rem; margin-bottom: .9rem; }
+#login-view label { font-weight: 600; }
+#login-view input { padding: .6rem .7rem; border: 1px solid #ddd; border-radius: .5rem; }
+#login-view .btn { padding: .65rem 1rem; border-radius: .6rem; }
+ul.messages { list-style: none; padding: 0; margin: 1rem 0; }
+ul.messages li { padding: .75rem 1rem; border-radius: .5rem; }
+ul.messages li.notice { background: #eef6ff; }
+ul.messages li.error { background: #fee2e2; }
+
+
 
 
 /* === Responsive tweaks === */

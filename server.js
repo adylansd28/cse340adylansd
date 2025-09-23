@@ -7,6 +7,7 @@ const baseController = require("./controllers/baseController")
 const inventoryRoute = require("./routes/inventoryRoute")
 const session = require("express-session")
 const pool = require("./database/")
+const accountRoute = require("./routes/accountRoute")
 
 const app = express()
 const PORT = process.env.PORT || 5500
@@ -47,6 +48,9 @@ app.get("/", utilities.handleErrors(baseController.buildHome))
 
 // Inventory routes
 app.use("/inv", inventoryRoute)
+
+// Account routes
+app.use("/account", accountRoute)
 
 /* ***********************
  * 404 → forward to error handler
