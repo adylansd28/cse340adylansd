@@ -5,10 +5,34 @@ const utilities = require("./utilities/")
 const staticRoutes = require("./routes/static")
 const baseController = require("./controllers/baseController")
 const inventoryRoute = require("./routes/inventoryRoute")
+const session = require("express-session")
+const pool = require("./database/")
 
 const app = express()
 const PORT = process.env.PORT || 5500
 const HOST = "0.0.0.0"
+
+/* ***********************
+ * Session & Messages Middleware
+ * ************************/
+app.use(session({
+  store: new (require("connect-pg-simple")(session))({
+    createTableIfMissing: true,
+    pool,
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: true,             // necesario para flash
+  saveUninitialized: true,
+  name: "sessionId",
+}))
+
+// Express Messages Middleware
+app.use(require("connect-flash")())
+app.use((req, res, next) => {
+  res.locals.messages = require("express-messages")(req, res)
+  next()
+})
+
 
 // View engine + layouts
 app.set("view engine", "ejs")
