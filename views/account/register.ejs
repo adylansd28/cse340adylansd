@@ -1,5 +1,3 @@
-<%- include("../partials/header.ejs") %>
-
 <main id="register-view" class="narrow">
   <h1><%= title %></h1>
 
@@ -12,24 +10,42 @@
       <li><%= error.msg %></li>
     <% }) %>
   </ul>
-    <% } %>
-
+  <% } %>
 
   <!-- Registration form -->
   <form id="registerForm" action="/account/register" method="post">
     <div class="field">
       <label for="account_firstname">First Name</label>
-      <input type="text" id="account_firstname" name="account_firstname" required autocomplete="given-name">
+      <input 
+        type="text" 
+        id="account_firstname" 
+        name="account_firstname" 
+        required 
+        autocomplete="given-name"
+        value="<%= locals.account_firstname %>">
     </div>
 
     <div class="field">
       <label for="account_lastname">Last Name</label>
-      <input type="text" id="account_lastname" name="account_lastname" required autocomplete="family-name">
+      <input 
+        type="text" 
+        id="account_lastname" 
+        name="account_lastname" 
+        required 
+        autocomplete="family-name"
+        value="<%= locals.account_lastname %>">
     </div>
 
     <div class="field">
       <label for="account_email">Email</label>
-      <input type="email" id="account_email" name="account_email" required placeholder="Enter a valid email address" autocomplete="email">
+      <input 
+        type="email" 
+        id="account_email" 
+        name="account_email" 
+        required 
+        placeholder="Enter a valid email address" 
+        autocomplete="email"
+        value="<%= locals.account_email %>">
     </div>
 
     <div class="field">
@@ -52,5 +68,3 @@
     <button type="submit" class="btn">Register</button>
   </form>
 </main>
-
-<%- include("../partials/footer.ejs") %>

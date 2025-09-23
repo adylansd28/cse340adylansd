@@ -5,11 +5,10 @@ const utilities = require("../utilities/")
 const accountController = require("../controllers/accountController")
 const regValidate = require("../utilities/account-validation")
 
+// Views
 router.get("/login", utilities.handleErrors(accountController.buildLogin))
-
 router.get("/register", utilities.handleErrors(accountController.buildRegister))
 
-// POST /account/register → procesa el registro
 // Process registration
 router.post(
   "/register",
@@ -18,6 +17,12 @@ router.post(
   utilities.handleErrors(accountController.registerAccount)
 )
 
-
+// Process login (with server-side validation, then stub handler)
+router.post(
+  "/login",
+  regValidate.loginRules(),
+  regValidate.checkLoginData,
+  (req, res) => res.status(200).send("login process")
+)
 
 module.exports = router
