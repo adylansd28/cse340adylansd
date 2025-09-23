@@ -7,26 +7,37 @@
   <%- messages() %>
 
   <!-- Registration form -->
-  <form id="registerForm" action="/account/register" method="post" novalidate>
+  <form id="registerForm" action="/account/register" method="post">
     <div class="field">
       <label for="account_firstname">First Name</label>
-      <input type="text" id="account_firstname" name="account_firstname" required>
+      <input type="text" id="account_firstname" name="account_firstname" required autocomplete="given-name">
     </div>
 
     <div class="field">
       <label for="account_lastname">Last Name</label>
-      <input type="text" id="account_lastname" name="account_lastname" required>
+      <input type="text" id="account_lastname" name="account_lastname" required autocomplete="family-name">
     </div>
 
     <div class="field">
       <label for="account_email">Email</label>
-      <input type="email" id="account_email" name="account_email" required>
+      <input type="email" id="account_email" name="account_email" required placeholder="Enter a valid email address" autocomplete="email">
     </div>
 
     <div class="field">
       <label for="account_password">Password</label>
-      <input type="password" id="account_password" name="account_password" required>
-      <small>Password must be at least 12 characters, include 1 capital letter, 1 number, and 1 special character.</small>
+      <span class="password-rules" id="pw-rules">
+        Passwords must be at least 12 characters and contain at least 1 number, 1 capital letter, and 1 special character.
+      </span>
+      <input
+        type="password"
+        id="account_password"
+        name="account_password"
+        required
+        minlength="12"
+        pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{12,}$"
+        title="At least 12 chars, with 1 uppercase, 1 number, and 1 special character."
+        autocomplete="new-password"
+        aria-describedby="pw-rules">
     </div>
 
     <button type="submit" class="btn">Register</button>

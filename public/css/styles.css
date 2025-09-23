@@ -216,9 +216,19 @@ ul.messages li.error { background: #fee2e2; }
 #register-view input { padding: .6rem .7rem; border: 1px solid #ddd; border-radius: .5rem; }
 #register-view .btn { padding: .65rem 1rem; border-radius: .6rem; }
 
+input:required:invalid, input:focus:invalid {
+  border: 2px solid #e74c3c; /* rojo */
+}
 
-
-
+input:required:valid {
+  border: 2px solid #2ecc71; /* verde */
+}
+.password-rules {
+  display: block;
+  font-size: .85rem;
+  color: #555;
+  margin-bottom: .3rem;
+}
 
 /* === Responsive tweaks === */
 @media (min-width:900px){
