@@ -230,6 +230,91 @@ input:required:valid {
   margin-bottom: .3rem;
 }
 
+/* ===== Panel de errores (server-side) ===== */
+.notice {
+  --err-bg: #eef6ff;
+  --err-border: #3b82f6;
+  --err-text: #0f172a;
+
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--err-border);
+  background: var(--err-bg);
+  color: var(--err-text);
+  border-radius: .6rem;
+  box-shadow: 0 1px 0 rgba(0,0,0,1);
+  list-style: none;
+}
+
+.notice li + li { margin-top: .65rem; }
+
+.notice li {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  align-items: start;
+  gap: .5rem;
+  line-height: 1.35;
+}
+
+/* “Icono” simple usando pseudo-elemento */
+.notice li::before {
+  content: "⚠️";
+  font-size: 1rem;
+  line-height: 1;
+  margin-top: .15rem;
+}
+
+/* ===== Modo oscuro (si el SO está en dark mode) ===== */
+@media (prefers-color-scheme: dark) {
+  .notice {
+    --err-bg: rgba(56,189,248,.08);   /* cyan-400 translucido */
+    --err-border: #22d3ee;            /* cyan-400 */
+    --err-text: #e5e7eb;              /* gray-200 */
+    box-shadow: 0 1px 0 rgba(255,255,255,.04);
+  }
+}
+
+/* ===== Inputs en error (si agregas la clase desde server) ===== */
+.input-error {
+  border: 2px solid #ef4444 !important; /* red-500 */
+  background: #fff7f7;
+}
+.input-error:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .input-error {
+    border-color: #f87171;
+    background: rgba(239,68,68,.08);
+  }
+}
+
+/* Mensaje de error debajo del campo (si lo usas) */
+.field-error {
+  margin-top: .35rem;
+  font-size: .875rem;
+  color: #b91c1c; /* red-700 */
+}
+
+/* ===== Ajustes de formularios para coherencia visual ===== */
+#register-view .field { margin-bottom: 1rem; }
+#register-view label { font-weight: 600; }
+#register-view input {
+  width: 100%;
+  padding: .65rem .8rem;
+  border: 1px solid #d1d5db;
+  border-radius: .55rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#register-view input:focus {
+  outline: none;
+  border-color: #3b82f6;              /* blue-500 */
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+}
+
+
 /* === Responsive tweaks === */
 @media (min-width:900px){
   .hero{ grid-template-columns:1.2fr .8fr }
@@ -244,4 +329,18 @@ input:required:valid {
 
 @media (max-width:480px){
   #inv-display{ grid-template-columns:1fr }
+}
+
+/* Forzar color de texto negro en los mensajes */
+.notice {
+  color: #000 !important;
+}
+
+.notice li {
+  color: #000 !important;
+  font-weight: 500; /* opcional, para que resalte más */
+}
+
+.notice li::before {
+  margin-top: .15rem;
 }
