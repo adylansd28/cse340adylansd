@@ -8,6 +8,8 @@ const inventoryRoute = require("./routes/inventoryRoute")
 const session = require("express-session")
 const pool = require("./database/")
 const accountRoute = require("./routes/accountRoute")
+const bodyParser = require("body-parser")
+
 
 const app = express()
 const PORT = process.env.PORT || 5500
@@ -33,6 +35,10 @@ app.use((req, res, next) => {
   res.locals.messages = require("express-messages")(req, res)
   next()
 })
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+
 
 
 // View engine + layouts
