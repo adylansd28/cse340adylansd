@@ -1,4 +1,6 @@
-/* === Design tokens === */
+/* ================================
+   Design tokens
+================================ */
 :root{
   --bg:#ffffff;
   --ink:#171717;
@@ -7,7 +9,9 @@
   --accent:#075985;
 }
 
-/* === Base reset === */
+/* ================================
+   Base reset
+================================ */
 *{ box-sizing:border-box }
 
 html, body{
@@ -20,7 +24,7 @@ html, body{
   overflow-x:hidden;
 }
 
-/* Background checkerboard only on large screens */
+/* Checkerboard background only on large screens */
 @media (min-width:1024px){
   body{
     background-image:url('/images/site/checkerboard.jpg');
@@ -31,23 +35,26 @@ html, body{
   }
 }
 
-/* === Layout helpers === */
-.container{ max-width:1100px; margin-inline:auto; padding:0 1rem }
+/* ================================
+   Layout helpers
+================================ */
 body{ min-height:100dvh; display:flex; flex-direction:column; align-items:stretch }
+.container{ max-width:1100px; margin-inline:auto; padding:0 1rem }
 main{ flex:1 0 auto }
 footer{ margin-top:auto }
 
-/* Skip link for accessibility */
+/* Skip link (a11y) */
 .skip-link{ position:absolute; left:-9999px; top:auto }
 .skip-link:focus{ left:1rem; top:1rem; background:#fff; color:#000; padding:.5rem .75rem; border:2px solid #000; z-index:10 }
 
-/* === Header / brand === */
+/* ================================
+   Header & top navigation
+================================ */
 #top-header{ padding:1rem 0; background:#fff }
 #top-header > .container{ display:flex; align-items:center; justify-content:space-between }
 .siteName a{ color:var(--ink); text-decoration:none; font-weight:800; font-size:1.6rem }
 .tools a{ color:var(--ink); text-decoration:none; font-weight:600 }
 
-/* === Top nav === */
 .nav-bar{ background:var(--brand) }
 .nav-bar > .container{ padding-left:0; padding-right:1rem }
 .nav-bar ul{
@@ -60,9 +67,11 @@ footer{ margin-top:auto }
   white-space:normal; outline-offset:2px;
 }
 .nav-bar a:focus-visible{ outline:2px solid #ffffff80 }
-.nav-bar a.active, .nav-bar a:hover{ background:rgba(255,255,255,.25) } /* better contrast */
+.nav-bar a.active, .nav-bar a:hover{ background:rgba(255,255,255,.25) }
 
-/* === Page blocks === */
+/* ================================
+   Page blocks
+================================ */
 main, footer.container, .hero, .two-col{ background:#fff; padding:1rem; box-shadow:none }
 main.container, footer.container{ width:100%; max-width:1100px; margin-inline:auto }
 
@@ -71,7 +80,9 @@ main.container, footer.container{ width:100%; max-width:1100px; margin-inline:au
 .car-name{ color:#0b70d1; margin:.4rem 0 }
 .car-bullets{ margin:.2rem 0 .8rem 1.2rem }
 
-/* === Generic button === */
+/* ================================
+   Generic button component
+================================ */
 .btn{
   display:inline-block; background:var(--accent); color:#fff; text-decoration:none;
   padding:.6rem 1rem; border-radius:.5rem; font-weight:700; border:none;
@@ -80,267 +91,186 @@ main.container, footer.container{ width:100%; max-width:1100px; margin-inline:au
 
 /* Danger button variant (footer “Cause Error”) */
 .btn-danger{ background-color:#b91c1c }
-.btn-danger:hover, .btn-danger:focus-visible{
-  background-color:#dc2626;
-  filter:brightness(1.05);
-  outline:2px solid #ffffff66;
-  outline-offset:2px;
+.btn-danger:hover,.btn-danger:focus-visible{
+  background-color:#dc2626; filter:brightness(1.05);
+  outline:2px solid #ffffff66; outline-offset:2px;
 }
 
-/* Media defaults */
-.hero-img{ width:100%; height:auto; max-width:560px; justify-self:center }
+/* ================================
+   Media defaults
+================================ */
 img, video, svg, canvas, table{ max-width:100%; height:auto; display:block }
+.hero-img{ width:100%; height:auto; max-width:560px; justify-self:center }
 a, p, li{ overflow-wrap:anywhere }
 
-/* === Home blocks === */
+/* ================================
+   Home sections
+================================ */
 .two-col{ display:grid; gap:2rem; padding:1rem 0 }
 .reviews{ padding-left:1.2rem }
 .upgrades{ display:grid; grid-template-columns:1fr 1fr; gap:1rem }
 .upgrades figure{ margin:0; background:#e7f7fb; border-radius:.6rem; padding:.6rem; text-align:center }
 .upgrades img{ max-width:100%; height:auto; display:block; margin:0 auto .5rem }
-
-/* Upgrades links without underline by default (keep underline on hover/focus) */
 .upgrades a{
-  text-decoration:none;
-  color:#005b87;
-  font-weight:600;
-  display:inline-block;
+  text-decoration:none; color:#005b87; font-weight:600; display:inline-block;
 }
 .upgrades a:hover, .upgrades a:focus-visible{ text-decoration:underline }
 
-/* === Vehicle Detail (detail.ejs) === */
-.vehicle-detail {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  align-items: flex-start; /* already ensures top alignment */
-  margin: 2rem auto;
-  max-width: 1200px;
+/* ================================
+   Vehicle detail (detail.ejs)
+================================ */
+.vehicle-detail{
+  display:flex; flex-wrap:wrap; gap:2rem; align-items:flex-start;
+  margin:2rem auto; max-width:1200px;
 }
 .vehicle-detail__media{ flex:1 1 420px; min-width:280px }
 .vehicle-detail__media img{ max-width:100%; height:auto; border-radius:8px }
-.vehicle-detail__content {
-  flex: 1 1 360px;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* force top alignment with image */
-}
-.vehicle-detail__title {
-  font-size: 1.75rem;
-  margin: 0 0 1rem; /* reset top margin to 0 */
-}
+.vehicle-detail__content{ flex:1 1 360px; min-width:280px; display:flex; flex-direction:column; justify-content:flex-start }
+.vehicle-detail__title{ font-size:1.75rem; margin:0 0 1rem }
 .vehicle-detail__price{ font-size:1.5rem; font-weight:bold; color:#004080; margin-bottom:1rem }
 .vehicle-detail__miles, .vehicle-detail__color, .vehicle-detail__class, .vehicle-detail__desc{ margin:.5rem 0 }
 
-/* === Classification Grid (generated via buildClassificationGrid) === */
+/* ================================
+   Classification grid
+================================ */
 #inv-display{
   list-style:none; padding:0; margin:1.25rem 0 0;
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
-  gap:1rem;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:1rem;
 }
 #inv-display li{
   background:#fff; border:1px solid #e5e7eb; border-radius:14px;
-  padding:0; /* image edge-to-edge; text box handles its own padding */
-  display:grid; gap:.6rem;
-  transition:box-shadow .2s ease, transform .12s ease;
+  padding:0; display:grid; gap:.6rem; transition:box-shadow .2s ease, transform .12s ease;
   overflow:hidden;
 }
 #inv-display li:hover{ box-shadow:0 10px 24px rgba(2,6,23,.08); transform:translateY(-2px) }
-#inv-display img{
-  width:100%; height:164px; object-fit:cover; border-radius:10px; /* inner radius for smooth corners */
-}
-#inv-display h2{
-  font-size:1rem; margin:0; padding:0; line-height:1.2;
-}
-#inv-display h2 a{
-  color:#0b70d1; text-decoration:none; font-weight:600;
-}
+#inv-display img{ width:100%; height:164px; object-fit:cover; border-radius:10px }
+#inv-display h2{ font-size:1rem; margin:0; padding:0; line-height:1.2 }
+#inv-display h2 a{ color:#0b70d1; text-decoration:none; font-weight:600 }
 #inv-display h2 a:hover, #inv-display h2 a:focus-visible{ text-decoration:underline }
 
-/* Text box under image (roomier and balanced with price) */
 #inv-display .namePrice{
   display:flex; align-items:center; justify-content:space-between; gap:.75rem;
-  padding:.75rem 1rem;            /* inner left/right spacing */
-  min-height:60px;                 /* taller text area */
-  background:#fff;
-  border-top:1px solid #e5e7eb;
-  border-radius:0 0 10px 10px;
+  padding:.75rem 1rem; min-height:60px; background:#fff;
+  border-top:1px solid #e5e7eb; border-radius:0 0 10px 10px;
 }
-#inv-display .namePrice hr{ display:none } /* hide original HR */
-#inv-display .namePrice span{
-  font-weight:700; color:#111827; font-size:.9rem; white-space:nowrap; /* smaller price, no wrap */
-}
+#inv-display .namePrice hr{ display:none }
+#inv-display .namePrice span{ font-weight:700; color:#111827; font-size:.9rem; white-space:nowrap }
 
-/* === Error pages (404 / 500) === */
+/* ================================
+   Error pages (404 / 500)
+================================ */
 .error-page{ text-align:center; padding:2rem }
 .error-page h1{ font-size:2rem; color:#c00 }
 .error-page p{ margin:1rem 0 }
-.error-page .btn{
-  display:inline-block; margin-top:1rem; padding:.75rem 1.25rem;
-  background-color:#004080; color:#fff; text-decoration:none; border-radius:6px;
-}
+.error-page .btn{ display:inline-block; margin-top:1rem; padding:.75rem 1.25rem; background-color:#004080; color:#fff; text-decoration:none; border-radius:6px }
 .error-page .btn:hover{ background-color:#0066cc }
 
-/* El <ul> recibe la clase notice/error directamente */
-ul.notice, ul.error {
-  list-style: none;
-  margin: 0 0 1rem;
-  padding: 0;
+/* ================================
+   Messages / alerts (flash & validation)
+   - Use <ul class="notice"> or <ul class="error">
+================================ */
+ul.messages, ul.notice, ul.error{ list-style:none; padding:0; margin:1rem 0 }
+ul.messages li, ul.notice li, ul.error li{ padding:.75rem 1rem; border-radius:.5rem }
+
+/* flash types rendered by express-messages */
+ul.messages li.notice, ul.notice { background:#eef6ff }
+ul.messages li.error,  ul.error  { background:#fee2e2 }
+
+/* Server-side aggregated notice panel */
+.notice{
+  --err-bg:#eef6ff;
+  --err-border:#3b82f6;
+  --err-text:#000; /* forced black for readability */
+
+  margin:1rem 0 1.25rem;
+  padding:1rem 1.25rem;
+  border-left:4px solid var(--err-border);
+  background:var(--err-bg);
+  color:var(--err-text);
+  border-radius:.6rem;
+  box-shadow:0 1px 0 rgba(0,0,0,1);
 }
-
-ul.notice li, ul.error li {
-  list-style: none; /* quita las viñetas */
-  margin: 0;
-  padding: .75rem 1rem;
-  border-radius: .5rem;
+.notice li + li{ margin-top:.65rem }
+.notice li{
+  display:grid; grid-template-columns:1.25rem 1fr; align-items:start; gap:.5rem; line-height:1.35; color:#000; font-weight:500;
 }
+.notice li::before{ content:"⚠️"; font-size:1rem; line-height:1; margin-top:.15rem }
 
-ul.notice { background: #eef6ff; }
-ul.error  { background: #fee2e2; }
-
-#login-view.narrow { max-width: 480px; margin: 2rem auto; }
-#login-view .field { display: grid; gap: .4rem; margin-bottom: .9rem; }
-#login-view label { font-weight: 600; }
-#login-view input { padding: .6rem .7rem; border: 1px solid #ddd; border-radius: .5rem; }
-#login-view .btn { padding: .65rem 1rem; border-radius: .6rem; }
-
-ul.messages { list-style: none; padding: 0; margin: 1rem 0; }
-ul.messages li { padding: .75rem 1rem; border-radius: .5rem; }
-ul.messages li.notice { background: #eef6ff; }
-ul.messages li.error { background: #fee2e2; }
-
-#register-view.narrow { max-width: 480px; margin: 2rem auto; }
-#register-view .field { display: grid; gap: .4rem; margin-bottom: .9rem; }
-#register-view label { font-weight: 600; }
-#register-view input { padding: .6rem .7rem; border: 1px solid #ddd; border-radius: .5rem; }
-#register-view .btn { padding: .65rem 1rem; border-radius: .6rem; }
-
-input:required:invalid, input:focus:invalid {
-  border: 2px solid #e74c3c; /* rojo */
-}
-
-input:required:valid {
-  border: 2px solid #2ecc71; /* verde */
-}
-.password-rules {
-  display: block;
-  font-size: .85rem;
-  color: #555;
-  margin-bottom: .3rem;
-}
-
-/* ===== Panel de errores (server-side) ===== */
-.notice {
-  --err-bg: #eef6ff;
-  --err-border: #3b82f6;
-  --err-text: #0f172a;
-
-  margin: 1rem 0 1.25rem;
-  padding: 1rem 1.25rem;
-  border-left: 4px solid var(--err-border);
-  background: var(--err-bg);
-  color: var(--err-text);
-  border-radius: .6rem;
-  box-shadow: 0 1px 0 rgba(0,0,0,1);
-  list-style: none;
-}
-
-.notice li + li { margin-top: .65rem; }
-
-.notice li {
-  display: grid;
-  grid-template-columns: 1.25rem 1fr;
-  align-items: start;
-  gap: .5rem;
-  line-height: 1.35;
-}
-
-/* “Icono” simple usando pseudo-elemento */
-.notice li::before {
-  content: "⚠️";
-  font-size: 1rem;
-  line-height: 1;
-  margin-top: .15rem;
-}
-
-/* ===== Modo oscuro (si el SO está en dark mode) ===== */
-@media (prefers-color-scheme: dark) {
-  .notice {
-    --err-bg: rgba(56,189,248,.08);   /* cyan-400 translucido */
-    --err-border: #22d3ee;            /* cyan-400 */
-    --err-text: #e5e7eb;              /* gray-200 */
-    box-shadow: 0 1px 0 rgba(255,255,255,.04);
+/* Dark mode for notice */
+@media (prefers-color-scheme: dark){
+  .notice{
+    --err-bg:rgba(56,189,248,.08);
+    --err-border:#22d3ee;
+    --err-text:#e5e7eb;
+    box-shadow:0 1px 0 rgba(255,255,255,.04);
   }
 }
 
-/* ===== Inputs en error (si agregas la clase desde server) ===== */
-.input-error {
-  border: 2px solid #ef4444 !important; /* red-500 */
-  background: #fff7f7;
+/* Field-level error helpers (optional) */
+.input-error{ border:2px solid #ef4444 !important; background:#fff7f7 }
+.input-error:focus{ outline:none; box-shadow:0 0 0 3px rgba(239,68,68,.15) }
+@media (prefers-color-scheme: dark){
+  .input-error{ border-color:#f87171; background:rgba(239,68,68,.08) }
 }
-.input-error:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(239,68,68,.15);
-}
+.field-error{ margin-top:.35rem; font-size:.875rem; color:#b91c1c }
 
-@media (prefers-color-scheme: dark) {
-  .input-error {
-    border-color: #f87171;
-    background: rgba(239,68,68,.08);
-  }
+/* ================================
+   Auth views: Login / Register
+================================ */
+#login-view.narrow, #register-view.narrow{ max-width:480px; margin:2rem auto }
+#login-view .field,  #register-view .field{ display:grid; gap:.4rem; margin-bottom:1rem }
+#login-view label,   #register-view label{ font-weight:600 }
+#login-view input,   #register-view input{
+  width:100%; padding:.65rem .8rem;
+  border:1px solid #d1d5db; border-radius:.55rem;
+  transition:border-color .15s ease, box-shadow .15s ease;
 }
-
-/* Mensaje de error debajo del campo (si lo usas) */
-.field-error {
-  margin-top: .35rem;
-  font-size: .875rem;
-  color: #b91c1c; /* red-700 */
+#login-view input:focus, #register-view input:focus{
+  outline:none; border-color:#3b82f6;
+  box-shadow:0 0 0 3px rgba(0,0,0,.15);
 }
+#login-view .btn, #register-view .btn{ padding:.65rem 1rem; border-radius:.6rem }
 
-/* ===== Ajustes de formularios para coherencia visual ===== */
-#register-view .field { margin-bottom: 1rem; }
-#register-view label { font-weight: 600; }
-#register-view input {
-  width: 100%;
-  padding: .65rem .8rem;
-  border: 1px solid #d1d5db;
-  border-radius: .55rem;
-  transition: border-color .15s ease, box-shadow .15s ease;
+/* Native client-side validation feedback */
+input:required:invalid{ border:1px solid #ddd }             /* neutral on load */
+input:required:user-invalid,
+input:focus:invalid{ border:2px solid #e74c3c }             /* red when invalid */
+.password-rules{ display:block; font-size:.85rem; color:#555; margin-bottom:.3rem }
+
+/* ================================
+   Management links (Inventory Management)
+================================ */
+.management-links{ list-style:none; padding:0 }
+.management-links li{ margin-bottom:1rem }
+.management-links .btn{
+  display:inline-block; padding:.6rem 1.2rem; background:#0a5275; color:#fff;
+  text-decoration:none; border-radius:.5rem; font-weight:bold;
 }
-#register-view input:focus {
-  outline: none;
-  border-color: #3b82f6;              /* blue-500 */
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+.management-links .btn:hover{ background:#083d57 }
+
+/* Add-classification: give space above the submit button */
+#add-classification-view .btn{ margin-top:1rem }
+
+/* Generic form submit button spacing + styling */
+form button{
+  margin-top:1rem;              /* breathing room above the button */
+  padding:.6rem 1.2rem;
+  border-radius:.5rem;
+  background-color:#0069a3;
+  color:#fff;
+  border:none;
+  cursor:pointer;
 }
+form button:hover{ background-color:#004d75 }
 
-
-/* === Responsive tweaks === */
+/* ================================
+   Responsive tweaks
+================================ */
 @media (min-width:900px){
   .hero{ grid-template-columns:1.2fr .8fr }
   .two-col{ grid-template-columns:1fr 1fr; align-items:start }
   #top-header > .container{ padding-left:0; padding-right:1rem }
   .hero-img{ justify-self:start; margin-left:-30px }
 }
-
-@media (max-width:768px){
-  .vehicle-detail{ flex-direction:column }
-}
-
-@media (max-width:480px){
-  #inv-display{ grid-template-columns:1fr }
-}
-
-/* Forzar color de texto negro en los mensajes */
-.notice {
-  color: #000 !important;
-}
-
-.notice li {
-  color: #000 !important;
-  font-weight: 500; /* opcional, para que resalte más */
-}
-
-.notice li::before {
-  margin-top: .15rem;
-}
+@media (max-width:768px){ .vehicle-detail{ flex-direction:column } }
+@media (max-width:480px){ #inv-display{ grid-template-columns:1fr } }

@@ -1,0 +1,31 @@
+<main id="add-classification-view" class="narrow">
+  <h1><%= title %></h1>
+
+  <!-- Flash messages -->
+  <%- messages() %>
+
+  <!-- Validation errors -->
+  <% if (errors) { %>
+    <ul class="notice">
+      <% errors.array().forEach(e => { %>
+        <li><%= e.msg %></li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <!-- Add Classification form -->
+  <form action="/inv/add-classification" method="post" novalidate>
+    <div class="field">
+      <label for="classification_name">Classification Name</label>
+      <input 
+        type="text" 
+        id="classification_name" 
+        name="classification_name"
+        required 
+        pattern="^[A-Za-z]+$"
+        value="<%= locals.classification_name %>">
+    </div>
+
+    <button type="submit" class="btn">Add</button>
+  </form>
+</main>

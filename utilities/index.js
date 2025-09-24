@@ -104,6 +104,33 @@ Util.buildVehicleDetailHTML = function (v) {
 }
 
 /* **************************************
+ * Build the <select> for classifications
+ * ************************************ */
+Util.buildClassificationList = async function (classification_id = null) {
+  const data = await invModel.getClassifications()
+  const rows = data?.rows ?? data // por si getClassifications ya devuelve .rows
+
+  if (!Array.isArray(rows)) {
+    throw new Error("getClassifications() did not return an array")
+  }
+
+  let html = '<select name="classification_id" id="classificationList" required>'
+  html += "<option value=''>Choose a Classification</option>"
+
+  for (const row of rows) {
+    const selected =
+      classification_id != null &&
+      String(row.classification_id) === String(classification_id)
+        ? " selected"
+        : ""
+    html += `<option value="${row.classification_id}"${selected}>${row.classification_name}</option>`
+  }
+  html += "</select>"
+  return html
+}
+
+
+/* **************************************
  * Format helpers
  ************************************ */
 Util.formatUSD = function (value) {
