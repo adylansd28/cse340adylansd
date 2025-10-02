@@ -82,20 +82,38 @@ router.get(
 
 /* ***************************
  * Edit inventory view
- *  - Soporta ambos nombres de función por si tu controller
- *    la definió como buildEditInventory o editInventoryView
  * ************************* */
 router.get(
   "/edit/:inv_id",
   utilities.handleErrors(
-    invController.buildEditInventory || invController.editInventoryView
+    invController.buildEditInventory // nombre canónico
   )
 )
 
-router.post("/update/",
+/* ***************************
+ * Update inventory (POST action)
+ * ************************* */
+router.post(
+  "/update",
   invValidate.newInventoryRules(),
   invValidate.checkUpdateData,
-  invController.updateInventory
+  utilities.handleErrors(invController.updateInventory)
+)
+
+/* ***************************
+ * Delete inventory (Confirm view)
+ * ************************* */
+router.get(
+  "/delete/:inv_id",
+  utilities.handleErrors(invController.buildDeleteConfirm)
+)
+
+/* ***************************
+ * Delete inventory (POST action)
+ * ************************* */
+router.post(
+  "/delete",
+  utilities.handleErrors(invController.deleteInventory)
 )
 
 module.exports = router

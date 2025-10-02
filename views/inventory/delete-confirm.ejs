@@ -1,0 +1,41 @@
+<!-- views/inventory/delete-confirm.ejs -->
+<main id="delete-inventory-view" class="narrow">
+  <h1><%= title %></h1>
+
+  <%- messages() %>
+
+  <% if (errors) { %>
+    <ul class="notice">
+      <% (errors.array ? errors.array() : errors).forEach(e => { %>
+        <li><%= e.msg %></li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <form action="/inv/delete" method="post">
+    <input type="hidden" name="inv_id" value="<%= inv_id %>">
+
+    <div class="field">
+      <label>Make</label>
+      <input type="text" value="<%= inv_make %>" readonly>
+    </div>
+
+    <div class="field">
+      <label>Model</label>
+      <input type="text" value="<%= inv_model %>" readonly>
+    </div>
+
+    <div class="field">
+      <label>Year</label>
+      <input type="text" value="<%= inv_year %>" readonly>
+    </div>
+
+    <div class="field">
+      <label>Price</label>
+      <input type="text" value="<%= inv_price %>" readonly>
+    </div>
+
+    <button type="submit" class="btn danger">Delete</button>
+    <a href="/inv/management" class="btn">Cancel</a>
+  </form>
+</main>

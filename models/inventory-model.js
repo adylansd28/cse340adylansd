@@ -25,8 +25,7 @@ async function getInventoryByClassificationId(classification_id) {
     WHERE i.classification_id = $1
     ORDER BY i.inv_make, i.inv_model
   `
-  const { rows } = await pool.query(sql, [classification_id])
-  return rows
+  return pool.query(sql, [classification_id])
 }
 
 /* ***************************
@@ -39,10 +38,8 @@ async function getVehicleById(inv_id) {
     JOIN public.classification AS c
       ON i.classification_id = c.classification_id
     WHERE i.inv_id = $1
-    LIMIT 1
   `
-  const { rows } = await pool.query(sql, [inv_id])
-  return rows[0] || null
+  return pool.query(sql, [inv_id])
 }
 
 /* ***************************
@@ -126,7 +123,7 @@ async function updateInventory(
     WHERE inv_id = $11
     RETURNING *
   `
-  const { rows } = await pool.query(sql, [
+  return pool.query(sql, [
     inv_make,
     inv_model,
     inv_description,
@@ -139,7 +136,18 @@ async function updateInventory(
     classification_id,
     inv_id,
   ])
-  return rows[0] || null
+}
+
+/* ***************************
+ *  Delete an inventory item by inv_id
+ * ************************** */
+async function deleteInventoryItem(inv_id) {
+  const sql = `
+    DELETE FROM public.inventory
+    WHERE inv_id = $1
+    RETURNING *
+  `
+  return pool.query(sql, [inv_id])
 }
 
 module.exports = {
@@ -149,4 +157,5 @@ module.exports = {
   addClassification,
   addInventory,
   updateInventory,
+  deleteInventoryItem,
 }

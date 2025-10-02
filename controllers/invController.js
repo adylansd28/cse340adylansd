@@ -14,8 +14,7 @@ invCont.buildByClassificationId = async function (req, res, next) {
     const grid = utilities.buildClassificationGrid(data)
     const nav = await utilities.getNav(req)
 
-    const firstRow =
-      Array.isArray(data) ? data[0] : data?.rows?.[0]
+    const firstRow = Array.isArray(data) ? data[0] : data?.rows?.[0]
     const className = firstRow?.classification_name || "Vehicle"
 
     res.render("inventory/classification", {
@@ -37,7 +36,8 @@ invCont.buildByInvId = async function (req, res, next) {
     const nav = await utilities.getNav(req)
 
     const vehicleRaw = await invModel.getVehicleById(inv_id)
-    const vehicle = vehicleRaw?.rows?.[0] ?? (Array.isArray(vehicleRaw) ? vehicleRaw[0] : vehicleRaw)
+    const vehicle =
+      vehicleRaw?.rows?.[0] ?? (Array.isArray(vehicleRaw) ? vehicleRaw[0] : vehicleRaw)
 
     if (!vehicle) {
       return res.status(404).render("errors/404", {
@@ -128,7 +128,6 @@ invCont.buildAddInventory = async function (req, res, next) {
       nav,
       classificationList,
       errors: null,
-      // defaults (stickiness)
       inv_make: "",
       inv_model: "",
       inv_description: "",
@@ -206,9 +205,9 @@ invCont.registerInventory = async function (req, res, next) {
 }
 
 /* ***************************
- *  Edit Inventory (GET) - Step 1
+ *  Edit Inventory (GET)
  * ************************** */
-invCont.editInventoryView = async function (req, res, next) {
+invCont.buildEditInventory = async function (req, res, next) {
   try {
     const inv_id = parseInt(req.params.inv_id, 10)
     const nav = await utilities.getNav(req)
@@ -229,7 +228,6 @@ invCont.editInventoryView = async function (req, res, next) {
       nav,
       classificationSelect,
       errors: null,
-      // values
       inv_id: itemData.inv_id,
       inv_make: itemData.inv_make,
       inv_model: itemData.inv_model,
@@ -248,8 +246,7 @@ invCont.editInventoryView = async function (req, res, next) {
 }
 
 /* ***************************
- *  Update Inventory (POST) - Step 2
- *  Form action: /inv/update
+ *  Update Inventory (POST)
  * ************************** */
 invCont.updateInventory = async function (req, res, next) {
   try {
@@ -268,7 +265,6 @@ invCont.updateInventory = async function (req, res, next) {
       classification_id,
     } = req.body
 
-    // 🔧 Importante: firma del modelo -> (inv_id, inv_make, ..., classification_id)
     const result = await invModel.updateInventory(
       inv_id,
       inv_make,
@@ -288,7 +284,6 @@ invCont.updateInventory = async function (req, res, next) {
       return res.redirect("/inv/management")
     }
 
-    // Falló el update -> re-render con valores ingresados
     req.flash("notice", "Update failed. Please correct and try again.")
     const classificationSelect = await utilities.buildClassificationList(classification_id)
     const itemName = [inv_make, inv_model].filter(Boolean).join(" ") || "Vehicle"
@@ -316,7 +311,87 @@ invCont.updateInventory = async function (req, res, next) {
 }
 
 /* ***************************
- *  Return Inventory by Classification As JSON (AJAX)
+ *  Delete Inventory (GET) - confirm
+ * ************************** */
+/* ***************************
+ *  Delete Inventory (GET) - confirm
+ * ************************** */
+invCont.buildDeleteConfirm = async function (req, res, next) {
+  try {
+
+    
+    const inv_id = parseInt(req.params.inv_id, 10)
+    const nav = await utilities.getNav(req)
+    console.log("GET /inv/delete/:inv_id", req.params)
+    console.log("parsed inv_id =", inv_id)
+
+    // Trae el vehículo y normaliza el resultado a un objeto único
+    const q = await invModel.getVehicleById(inv_id)
+    const item =
+      (Array.isArray(q) && q[0]) ||
+      (q && Array.isArray(q.rows) && q.rows[0]) ||
+      q || null
+
+    console.log("vehicle =", q)
+
+    if (!item) {
+      req.flash("notice", "Vehicle not found.")
+      return res.redirect("/inv/management")
+    }
+
+    const itemName = `${item.inv_make} ${item.inv_model}`
+
+    return res.render("inventory/delete-confirm", {
+      title: "Delete " + itemName,
+      nav,
+      errors: null,
+      inv_id: item.inv_id,
+      inv_make: item.inv_make,
+      inv_model: item.inv_model,
+      inv_year: item.inv_year,
+      inv_price: item.inv_price,
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+/* ***************************
+ *  Delete Inventory (POST)
+ * ************************** */
+invCont.deleteInventory = async function (req, res, next) {
+  try {
+    const inv_id = parseInt(req.body.inv_id, 10)
+    // en deleteInventory
+    console.log("POST /inv/delete body:", req.body)
+    console.log("parsed inv_id =", inv_id)
+
+    console.log("POST /inv/delete body:", req.body)
+    console.log("parsed inv_id =", inv_id)
+
+
+    if (!inv_id || Number.isNaN(inv_id)) {
+      req.flash("notice", "Invalid request.")
+      return res.redirect("/inv/management")
+    }
+
+    const delResult = await invModel.deleteInventoryItem(inv_id)
+    const affected = delResult?.rowCount ?? 0
+
+    if (affected > 0) {
+      req.flash("notice", "Inventory item deleted successfully.")
+      return res.redirect("/inv/management")
+    }
+
+    req.flash("notice", "Delete failed. Please try again.")
+    return res.redirect(`/inv/delete/${inv_id}`)
+  } catch (err) {
+    next(err)
+  }
+}
+
+/* ***************************
+ *  Return Inventory as JSON (AJAX)
  * ************************** */
 invCont.getInventoryJSON = async (req, res, next) => {
   try {
