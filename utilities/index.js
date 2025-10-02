@@ -2,20 +2,48 @@
 const invModel = require("../models/inventory-model")
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
+
 const COOKIE_NAME = process.env.COOKIE_NAME || "jwt"
+const JWT_SECRET  = process.env.JWT_SECRET  || "dev_secret_change_me"
 
 const Util = {}
+
+/* ---------------------------
+ * Helpers
+ * ------------------------- */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+function toRows(resultOrArray) {
+  // Normaliza: puede venir como array o como { rows }
+  if (Array.isArray(resultOrArray)) return resultOrArray
+  if (resultOrArray && Array.isArray(resultOrArray.rows)) return resultOrArray.rows
+  return []
+}
+
+function redirectWithMessage(req, res, path, msg) {
+  if (msg && typeof req.flash === "function") req.flash("notice", msg)
+  return res.redirect(path)
+}
 
 /* ************************
  * Build top navigation (ul > li > a)
  * - Highlights current route
  ************************** */
 Util.getNav = async function (req) {
-  // Combina mount + path y normaliza
-  const currentUrlRaw = `${req?.baseUrl || ""}${req?.path || "/"}`
-  const current = currentUrlRaw.replace(/\/+$/, "") || "/" // quita "/" final excepto raíz
+  const base = req?.baseUrl || ""
+  const path = req?.path || "/"
+  const current = (`${base}${path}`).replace(/\/+$/, "") || "/"
 
-  const data = await invModel.getClassifications()
+  const result = await invModel.getClassifications()
+  const rows = toRows(result)
+
   let list = "<ul>"
 
   // Home
@@ -23,19 +51,11 @@ Util.getNav = async function (req) {
   list += `<li><a href="/" title="Home page"${isHome ? ' class="active" aria-current="page"' : ""}>Home</a></li>`
 
   // Clasificaciones
-  data.rows.forEach((row) => {
+  for (const row of rows) {
     const href = `/inv/type/${row.classification_id}`
     const isActive = current === href
-    list += `<li><a href="${href}" title="See our inventory of ${row.classification_name} vehicles"${isActive ? ' class="active" aria-current="page"' : ""}>${row.classification_name}</a></li>`
-  })
-
-  // My Account (dinámico: login vs no login)
-  if (req?.res?.locals?.loggedin) {
-    const isAccount = current === "/account"
-    list += `<li><a href="/account" title="Manage your account"${isAccount ? ' class="active" aria-current="page"' : ""}>My Account</a></li>`
-  } else {
-    const isLogin = current === "/account/login"
-    list += `<li><a href="/account/login" title="Login to your account"${isLogin ? ' class="active" aria-current="page"' : ""}>My Account</a></li>`
+    const name = escapeHtml(row.classification_name)
+    list += `<li><a href="${href}" title="See our inventory of ${name} vehicles"${isActive ? ' class="active" aria-current="page"' : ""}>${name}</a></li>`
   }
 
   list += "</ul>"
@@ -44,49 +64,36 @@ Util.getNav = async function (req) {
 
 /* **************************************
  * Build the classification grid HTML
+ *  - Acepta array vacío sin romper
  * ************************************ */
 Util.buildClassificationGrid = function (data) {
-  if (!data || data.length === 0) {
+  const list = Array.isArray(data) ? data : []
+  if (list.length === 0) {
     return '<p class="notice">Sorry, no matching vehicles could be found.</p>'
   }
 
   let grid = '<ul id="inv-display">'
-  data.forEach((vehicle) => {
-    grid += "<li>"
-    grid +=
-      '<a href="../../inv/detail/' +
-      vehicle.inv_id +
-      '" title="View ' +
-      vehicle.inv_make +
-      " " +
-      vehicle.inv_model +
-      ' details"><img src="' +
-      vehicle.inv_thumbnail +
-      '" alt="Image of ' +
-      vehicle.inv_make +
-      " " +
-      vehicle.inv_model +
-      ' on CSE Motors" /></a>'
-    grid += '<div class="namePrice">'
-    grid += "<hr />"
-    grid += "<h2>"
-    grid +=
-      '<a href="../../inv/detail/' +
-      vehicle.inv_id +
-      '" title="View ' +
-      vehicle.inv_make +
-      " " +
-      vehicle.inv_model +
-      ' details">' +
-      vehicle.inv_make +
-      " " +
-      vehicle.inv_model +
-      "</a>"
-    grid += "</h2>"
-    grid += "<span>" + Util.formatUSD(vehicle.inv_price) + "</span>"
-    grid += "</div>"
-    grid += "</li>"
-  })
+  for (const v of list) {
+    const id = v.inv_id
+    const name = `${v.inv_make ?? ""} ${v.inv_model ?? ""}`.trim()
+    const nameEsc = escapeHtml(name)
+    const thumb = v.inv_thumbnail ? escapeHtml(v.inv_thumbnail) : "/images/no-image.png"
+    const price = Util.formatUSD(v.inv_price)
+
+    grid += `
+      <li>
+        <a href="/inv/detail/${id}" title="View ${nameEsc} details">
+          <img src="${thumb}" alt="Image of ${nameEsc} on CSE Motors" />
+        </a>
+        <div class="namePrice">
+          <hr />
+          <h2>
+            <a href="/inv/detail/${id}" title="View ${nameEsc} details">${nameEsc}</a>
+          </h2>
+          <span>${price}</span>
+        </div>
+      </li>`
+  }
   grid += "</ul>"
   return grid
 }
@@ -102,15 +109,15 @@ Util.buildVehicleDetailHTML = function (v) {
   return `
   <section class="vehicle-detail">
     <div class="vehicle-detail__media">
-      <img src="${v.inv_image}" alt="${title}" />
+      <img src="${escapeHtml(v.inv_image)}" alt="${escapeHtml(title)}" />
     </div>
     <div class="vehicle-detail__content">
-      <h1 class="vehicle-detail__title">${title}</h1>
+      <h1 class="vehicle-detail__title">${escapeHtml(title)}</h1>
       <p class="vehicle-detail__price"><strong>Price:</strong> ${price}</p>
       <p class="vehicle-detail__miles"><strong>Mileage:</strong> ${miles} miles</p>
-      <p class="vehicle-detail__color"><strong>Color:</strong> ${v.inv_color}</p>
-      <p class="vehicle-detail__class"><strong>Classification:</strong> ${v.classification_name}</p>
-      <p class="vehicle-detail__desc">${v.inv_description}</p>
+      <p class="vehicle-detail__color"><strong>Color:</strong> ${escapeHtml(v.inv_color)}</p>
+      <p class="vehicle-detail__class"><strong>Classification:</strong> ${escapeHtml(v.classification_name)}</p>
+      <p class="vehicle-detail__desc">${escapeHtml(v.inv_description)}</p>
     </div>
   </section>
   `
@@ -120,12 +127,8 @@ Util.buildVehicleDetailHTML = function (v) {
  * Build the <select> for classifications
  * ************************************ */
 Util.buildClassificationList = async function (classification_id = null) {
-  const data = await invModel.getClassifications()
-  const rows = data?.rows ?? data // por si getClassifications ya devuelve .rows
-
-  if (!Array.isArray(rows)) {
-    throw new Error("getClassifications() did not return an array")
-  }
+  const result = await invModel.getClassifications()
+  const rows = toRows(result)
 
   let html = '<select name="classification_id" id="classificationList" required>'
   html += "<option value=''>Choose a Classification</option>"
@@ -136,7 +139,7 @@ Util.buildClassificationList = async function (classification_id = null) {
       String(row.classification_id) === String(classification_id)
         ? " selected"
         : ""
-    html += `<option value="${row.classification_id}"${selected}>${row.classification_name}</option>`
+    html += `<option value="${row.classification_id}"${selected}>${escapeHtml(row.classification_name)}</option>`
   }
   html += "</select>"
   return html
@@ -164,58 +167,57 @@ Util.handleErrors =
     Promise.resolve(fn(req, res, next)).catch(next)
 
 /* ****************************************
- * Paso 7: Middleware para verificar JWT en la cookie
- * - Si existe y es válido → expone accountData y loggedin=1
- * - Si existe y es inválido/expiró → limpia cookie, loggedin=0
- * - Si no existe → continúa sin romper páginas públicas
- **************************************** */
-
-/* ****************************************
- * Middleware to check token validity
+ * Middleware: hidratar login desde cookie JWT (suave)
+ * - Si token válido → res.locals.loggedin/accountData
+ * - Si no hay token o es inválido → seguir como anónimo (NO limpiar cookie)
  **************************************** */
 Util.checkJWTToken = (req, res, next) => {
-  const { cookies = {} } = req
-  const token = cookies[COOKIE_NAME] // 👈 usa el nombre unificado
+  const token = req?.cookies?.[COOKIE_NAME]
+  res.locals.loggedin = false
+  res.locals.accountData = null
 
-  if (token) {
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, accountData) => {
-      if (err) {
-        // token inválido => limpia y pide login
-        res.clearCookie(COOKIE_NAME)
-        // no uses flash aquí si no estás seguro de la sesión
-        return res.redirect("/account/login")
-      }
-      res.locals.accountData = accountData
-      res.locals.loggedin = 1
-      return next()
-    })
-  } else {
+  if (!token) return next()
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET)
+    res.locals.loggedin = true
+    res.locals.accountData = payload
+    return next()
+  } catch {
     return next()
   }
 }
 
 /* ****************************************
- * (Opcional) Guard para proteger rutas privadas
- * Úsalo en rutas que requieran sesión:
- *   router.get("/account", Util.requireAuth, controller.buildAccount)
+ * Guards
  **************************************** */
 Util.requireAuth = (req, res, next) => {
-  if (res.locals?.loggedin === 1 && res.locals?.accountData) return next()
-  req.flash("notice", "Please log in.")
-  return res.redirect("/account/login")
+  if (res.locals?.loggedin && res.locals?.accountData) return next()
+  return redirectWithMessage(req, res, "/account/login", "Please log in to continue.")
 }
 
-/* ****************************************
- *  Check Login
- * ************************************ */
-Util.checkLogin = (req, res, next) => {
-  if (res.locals.loggedin) {
-    next()
-  } else {
-    req.flash("notice", "Please log in.")
-    return res.redirect("/account/login")
+// Unificado para rutas de inventario protegidas
+Util.requireEmployeeOrAdmin = (req, res, next) => {
+  const loggedIn = !!res.locals?.loggedin
+  const accType  = res.locals?.accountData?.account_type
+
+  if (!loggedIn) {
+    return redirectWithMessage(req, res, "/account/login", "Please log in to continue.")
   }
+  if (!["Employee", "Admin"].includes(accType)) {
+    return redirectWithMessage(req, res, "/account", "You are not authorized to access that page.")
+  }
+  return next()
 }
 
+Util.noCache = (req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+  res.set("Pragma", "no-cache")
+  res.set("Expires", "0")
+  next()
+}
+
+// Alias histórico (si alguna ruta lo usa)
+Util.checkLogin = Util.requireAuth
 
 module.exports = Util

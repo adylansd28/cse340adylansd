@@ -22,6 +22,31 @@ const HOST = "0.0.0.0"
  * Cookies httpOnly
  * ====================== */
 app.use(cookieParser())
+
+// --- RAYOS-X COOKIES ---
+app.use((req, res, next) => {
+  // IN: qué cookies llegan
+  console.log("[IN ]", req.method, req.path, "Cookie:", req.headers.cookie || "(none)")
+
+  // Hook: res.cookie
+  const _cookie = res.cookie.bind(res)
+  res.cookie = (name, val, opts) => {
+    const valLog = typeof val === "string" ? (val.length > 25 ? val.slice(0,25)+"...":"<string>") : typeof val
+    console.log("[SET]", name, "=", valLog, "opts:", opts)
+    return _cookie(name, val, opts)
+  }
+
+  // Hook: res.clearCookie
+  const _clear = res.clearCookie.bind(res)
+  res.clearCookie = (name, opts) => {
+    console.log("[CLR]", name, "opts:", opts)
+    return _clear(name, opts)
+  }
+
+  next()
+})
+
+
 app.use(auth.injectAuth)
 
 /* ======================

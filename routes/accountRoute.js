@@ -8,11 +8,22 @@ const regValidate = require("../utilities/account-validation")
 /* ***************
  *  Views
  * *************** */
-router.get("/login", utilities.handleErrors(accountController.buildLogin))
-router.get("/register", utilities.handleErrors(accountController.buildRegister))
+router.get(
+  "/login",
+  utilities.noCache,
+  utilities.handleErrors(accountController.buildLogin)
+)
+
+router.get(
+  "/register",
+  utilities.noCache,
+  utilities.handleErrors(accountController.buildRegister)
+)
+
 router.get(
   "/",
   utilities.checkLogin,
+  utilities.noCache,
   utilities.handleErrors(accountController.buildAccountManagement)
 )
 
@@ -39,7 +50,10 @@ router.post(
 /* ***************
  *  Logout
  * *************** */
-router.get("/logout", utilities.handleErrors(accountController.logout))
+router.get(
+  "/logout",
+  utilities.handleErrors(accountController.logout)
+)
 
 /* ***************
  *  Update Account Info (GET view)
@@ -47,7 +61,8 @@ router.get("/logout", utilities.handleErrors(accountController.logout))
 router.get(
   "/update/:account_id",
   utilities.checkLogin,
-  utilities.handleErrors(accountController.buildUpdateAccount)
+  utilities.noCache,
+  utilities.handleErrors(accountController.buildUpdateView) // ✅ nombre correcto
 )
 
 /* ***************
@@ -65,7 +80,7 @@ router.post(
  * *************** */
 router.post(
   "/update-password",
-  regValidate.updatePasswordRules(),   // ✅ corregido (antes passwordRules)
+  regValidate.updatePasswordRules(),   // ✅ corregido
   regValidate.checkPasswordData,
   utilities.handleErrors(accountController.updatePassword)
 )

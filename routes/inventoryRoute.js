@@ -6,23 +6,26 @@ const router = express.Router()
 const invController = require("../controllers/invController")
 const utilities = require("../utilities/")
 const invValidate = require("../utilities/inv-validation")
-const auth = require("../utilities/auth-middleware") 
 
 /* ---------------------------------------
  * Home (alias) → Management
  *  /inv  y  /inv/management  muestran lo mismo
+ *  Ambas protegidas para evitar bypass
  * ------------------------------------- */
 router.get(
   "/",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildManagement)
 )
-router.get("/management",
-  auth.requireEmployeeOrAdmin,
+
+router.get(
+  "/management",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildManagement)
 )
 
 /* ***************************
- * Inventory by classification
+ * Inventory by classification (pública)
  * ************************* */
 router.get(
   "/type/:classificationId",
@@ -30,7 +33,7 @@ router.get(
 )
 
 /* ***************************
- * Inventory detail by inv_id
+ * Inventory detail by inv_id (pública)
  * ************************* */
 router.get(
   "/detail/:inv_id",
@@ -40,16 +43,18 @@ router.get(
 /* ***************************
  * Add Classification (GET form)
  * ************************* */
-router.get("/add-classification",
-  auth.requireEmployeeOrAdmin,
+router.get(
+  "/add-classification",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildAddClassification)
 )
 
 /* ***************************
  * Add Classification (POST submit)
  * ************************* */
-router.post("/add-classification",
-  auth.requireEmployeeOrAdmin,
+router.post(
+  "/add-classification",
+  utilities.requireEmployeeOrAdmin,
   invValidate.classificationRules(),
   invValidate.checkClassificationData,
   utilities.handleErrors(invController.addClassification)
@@ -58,16 +63,18 @@ router.post("/add-classification",
 /* ***************************
  * Add Inventory (GET form)
  * ************************* */
-router.get("/add-inventory",
-  auth.requireEmployeeOrAdmin,
+router.get(
+  "/add-inventory",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildAddInventory)
 )
 
 /* ***************************
  * Add Inventory (POST submit)
  * ************************* */
-router.post("/add-inventory",
-  auth.requireEmployeeOrAdmin,
+router.post(
+  "/add-inventory",
+  utilities.requireEmployeeOrAdmin,
   invValidate.inventoryRules(),
   invValidate.checkInventoryData,
   utilities.handleErrors(invController.addInventory)
@@ -75,6 +82,7 @@ router.post("/add-inventory",
 
 /* ***************************
  * AJAX: inventory list by classification (JSON)
+ * (normalmente pública para poblar selects en formularios)
  * ************************* */
 router.get(
   "/getInventory/:classification_id",
@@ -84,16 +92,18 @@ router.get(
 /* ***************************
  * Edit inventory view
  * ************************* */
-router.get("/edit/:inv_id",
-  auth.requireEmployeeOrAdmin,
+router.get(
+  "/edit/:inv_id",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildEditInventory)
 )
 
 /* ***************************
  * Update inventory (POST action)
  * ************************* */
-router.post("/update",
-  auth.requireEmployeeOrAdmin,
+router.post(
+  "/update",
+  utilities.requireEmployeeOrAdmin,
   invValidate.inventoryRules(),
   invValidate.checkInventoryData,
   utilities.handleErrors(invController.updateInventory)
@@ -102,16 +112,18 @@ router.post("/update",
 /* ***************************
  * Delete inventory (Confirm view)
  * ************************* */
-router.get("/delete/:inv_id",
-  auth.requireEmployeeOrAdmin,
+router.get(
+  "/delete/:inv_id",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildDeleteConfirm)
 )
 
 /* ***************************
  * Delete inventory (POST action)
  * ************************* */
-router.post("/delete",
-  auth.requireEmployeeOrAdmin,
+router.post(
+  "/delete",
+  utilities.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.deleteInventory)
 )
 
