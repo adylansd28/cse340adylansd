@@ -1,3 +1,4 @@
+// utilities/account-validation.js
 const utilities = require(".") // asumiendo que utilities/index.js exporta getNav
 const { body, validationResult } = require("express-validator")
 const accountModel = require("../models/account-model")
@@ -40,7 +41,7 @@ validate.registrationRules = () => {
       .trim()
       .notEmpty().withMessage("Password is required.")
       .bail()
-      // sin espacios (coincide con tu pattern de register.ejs)
+      // sin espacios
       .matches(/^\S+$/).withMessage("Password cannot contain spaces.")
       .bail()
       .isStrongPassword({
@@ -56,7 +57,6 @@ validate.registrationRules = () => {
 
 /* ******************************
  * Check registration data and return errors or continue
- * (renders with stickiness on failure)
  * ***************************** */
 validate.checkRegData = async (req, res, next) => {
   const { account_firstname, account_lastname, account_email } = req.body
@@ -77,7 +77,6 @@ validate.checkRegData = async (req, res, next) => {
 
 /* **********************************
  *  Login Data Validation Rules
- *  (solo requeridos, sin complejidad)
  * ********************************* */
 validate.loginRules = () => {
   return [
@@ -104,7 +103,91 @@ validate.checkLoginData = async (req, res, next) => {
       errors,
       title: "Login",
       nav,
-      account_email, // stickiness para email en login
+      account_email,
+    })
+  }
+  next()
+}
+
+/* **********************************
+ *  Update Account Info Validation Rules
+ * ********************************* */
+validate.updateAccountRules = () => {
+  return [
+    body("account_id").toInt().isInt().withMessage("Invalid account id."),
+
+    body("account_firstname")
+      .trim()
+      .escape()
+      .notEmpty().withMessage("Please provide a first name."),
+
+    body("account_lastname")
+      .trim()
+      .escape()
+      .notEmpty().withMessage("Please provide a last name."),
+
+    body("account_email")
+      .trim()
+      .isEmail().withMessage("A valid email is required.")
+      .bail()
+      .normalizeEmail(),
+  ]
+}
+
+validate.checkUpdateData = async (req, res, next) => {
+  const { account_id, account_firstname, account_lastname, account_email } = req.body
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    const nav = await utilities.getNav()
+    return res.render("account/update", {
+      errors,
+      title: "Update Account",
+      nav,
+      account_id,
+      account_firstname,
+      account_lastname,
+      account_email,
+    })
+  }
+  next()
+}
+
+/* **********************************
+ *  Update Password Validation Rules
+ * ********************************* */
+validate.updatePasswordRules = () => {
+  return [
+    body("account_id").toInt().isInt().withMessage("Invalid account id."),
+    body("account_password")
+      .trim()
+      .notEmpty().withMessage("Password is required.")
+      .bail()
+      .matches(/^\S+$/).withMessage("Password cannot contain spaces.")
+      .bail()
+      .isStrongPassword({
+        minLength: 12,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+      })
+      .withMessage("Password does not meet requirements."),
+  ]
+}
+
+validate.checkPasswordData = async (req, res, next) => {
+  const { account_id, account_firstname, account_lastname, account_email } = req.body
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    const nav = await utilities.getNav()
+    return res.render("account/update", {
+      errors,
+      title: "Update Account",
+      nav,
+      account_id,
+      account_firstname,
+      account_lastname,
+      account_email,
     })
   }
   next()

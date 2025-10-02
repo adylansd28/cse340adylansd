@@ -6,6 +6,7 @@ const router = express.Router()
 const invController = require("../controllers/invController")
 const utilities = require("../utilities/")
 const invValidate = require("../utilities/inv-validation")
+const auth = require("../utilities/auth-middleware") 
 
 /* ---------------------------------------
  * Home (alias) → Management
