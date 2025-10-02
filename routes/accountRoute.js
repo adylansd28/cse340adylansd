@@ -5,24 +5,46 @@ const utilities = require("../utilities/")
 const accountController = require("../controllers/accountController")
 const regValidate = require("../utilities/account-validation")
 
-// Views
+/* ***************
+ *  Views
+ * *************** */
 router.get("/login", utilities.handleErrors(accountController.buildLogin))
 router.get("/register", utilities.handleErrors(accountController.buildRegister))
+router.get(
+  "/",
+  utilities.checkLogin,
+  utilities.handleErrors(accountController.buildAccountManagement)
+)
 
-// Process registration
+/* ***************
+ *  Process Registration
+ * *************** */
 router.post(
   "/register",
-  regValidate.registationRules(),
+  regValidate.registrationRules(),
   regValidate.checkRegData,
   utilities.handleErrors(accountController.registerAccount)
 )
 
-// Process login (with server-side validation, then stub handler)
+/* ***************
+ *  Process Login
+ * *************** */
 router.post(
   "/login",
   regValidate.loginRules(),
   regValidate.checkLoginData,
-  (req, res) => res.status(200).send("login process")
+  utilities.handleErrors(accountController.accountLogin) // <- nombre correcto
 )
+
+/* ***************
+ *  Process Logout
+ * *************** */
+router.post(
+  "/logout",
+  utilities.handleErrors(accountController.logoutAccount)
+)
+
+// routes/accountRoute.js
+router.get("/logout", utilities.handleErrors(accountController.logout))
 
 module.exports = router

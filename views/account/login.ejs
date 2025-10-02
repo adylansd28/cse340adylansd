@@ -8,17 +8,23 @@
   <form id="loginForm" action="/account/login" method="post">
     <div class="field">
       <label for="account_email">Email</label>
-      <input type="email" id="account_email" name="account_email" required placeholder="Enter a valid email address">
+      <input 
+        type="email" 
+        id="account_email" 
+        name="account_email" 
+        required 
+        placeholder="Enter a valid email address">
     </div>
 
     <div class="field">
       <label for="account_password">Password</label>
-      <span class="password-rules">
-        Passwords must be at least 12 characters and contain at least 1 number, 
-        1 capital letter and 1 special character
-      </span>
-      <input type="password" id="account_password" name="account_password" required
-        pattern="^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\\s).{12,}$">
+      <input 
+        type="password" 
+        id="account_password" 
+        name="account_password" 
+        required 
+        autocomplete="current-password"
+        placeholder="Enter your password">
     </div>
 
     <button type="submit" class="btn">Login</button>

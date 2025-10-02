@@ -2,10 +2,23 @@
 
 // Needed Resources
 const express = require("express")
-const router = new express.Router()
+const router = express.Router()
 const invController = require("../controllers/invController")
 const utilities = require("../utilities/")
 const invValidate = require("../utilities/inv-validation")
+
+/* ---------------------------------------
+ * Home (alias) → Management
+ *  /inv  y  /inv/management  muestran lo mismo
+ * ------------------------------------- */
+router.get(
+  "/",
+  utilities.handleErrors(invController.buildManagement)
+)
+router.get(
+  "/management",
+  utilities.handleErrors(invController.buildManagement)
+)
 
 /* ***************************
  * Inventory by classification
@@ -21,14 +34,6 @@ router.get(
 router.get(
   "/detail/:inv_id",
   utilities.handleErrors(invController.buildByInvId)
-)
-
-/* ***************************
- * Management view
- * ************************* */
-router.get(
-  "/",
-  utilities.handleErrors(invController.buildManagement)
 )
 
 /* ***************************
@@ -65,6 +70,32 @@ router.post(
   invValidate.inventoryRules(),
   invValidate.checkInventoryData,
   utilities.handleErrors(invController.registerInventory)
+)
+
+/* ***************************
+ * AJAX: inventory list by classification (JSON)
+ * ************************* */
+router.get(
+  "/getInventory/:classification_id",
+  utilities.handleErrors(invController.getInventoryJSON)
+)
+
+/* ***************************
+ * Edit inventory view
+ *  - Soporta ambos nombres de función por si tu controller
+ *    la definió como buildEditInventory o editInventoryView
+ * ************************* */
+router.get(
+  "/edit/:inv_id",
+  utilities.handleErrors(
+    invController.buildEditInventory || invController.editInventoryView
+  )
+)
+
+router.post("/update/",
+  invValidate.newInventoryRules(),
+  invValidate.checkUpdateData,
+  invController.updateInventory
 )
 
 module.exports = router

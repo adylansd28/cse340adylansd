@@ -6,8 +6,29 @@
 
   <section class="actions">
     <ul class="management-links">
-      <li><a href="/inv/add-classification" class="btn" aria-label="Add a new classification">Add New Classification</a></li>
-      <li><a href="/inv/add-inventory" class="btn" aria-label="Add a new inventory item">Add New Inventory</a></li>
+      <li>
+        <a href="/inv/add-classification" class="btn" aria-label="Add a new classification">
+          Add New Classification
+        </a>
+      </li>
+      <li>
+        <a href="/inv/add-inventory" class="btn" aria-label="Add a new inventory item">
+          Add New Inventory
+        </a>
+      </li>
     </ul>
   </section>
+
+  <!-- Paso 2: Select y tabla dinámica -->
+  <section class="management-inventory">
+    <h2>Manage Inventory</h2>
+    <p>Choose a classification to see the inventory items.</p>
+    <%- classificationSelect %>
+
+    <table id="inventoryDisplay"></table>
+    <noscript>JavaScript must be enabled to use this page.</noscript>
+  </section>
 </main>
+
+<!-- Script para manejo con AJAX -->
+<script src="../../js/inventory.js"></script>

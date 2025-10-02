@@ -1,4 +1,5 @@
 // server.js
+require("dotenv").config()
 const express = require("express")
 const expressLayouts = require("express-ejs-layouts")
 const utilities = require("./utilities/")
@@ -9,71 +10,85 @@ const session = require("express-session")
 const pool = require("./database/")
 const accountRoute = require("./routes/accountRoute")
 const bodyParser = require("body-parser")
-
+const cookieParser = require("cookie-parser")
+const accountController = require("./controllers/accountController")
 
 const app = express()
 const PORT = process.env.PORT || 5500
 const HOST = "0.0.0.0"
 
-/* ***********************
- * Session & Messages Middleware
- * ************************/
+/* ======================
+ * Cookies httpOnly
+ * ====================== */
+app.use(cookieParser())
+
+/* ======================
+ * Session & flash msgs
+ * ====================== */
 app.use(session({
   store: new (require("connect-pg-simple")(session))({
     createTableIfMissing: true,
     pool,
   }),
   secret: process.env.SESSION_SECRET,
-  resave: true,             // necesario para flash
+  resave: true,             // requerido por connect-flash
   saveUninitialized: true,
   name: "sessionId",
 }))
-
-// Express Messages Middleware
 app.use(require("connect-flash")())
 app.use((req, res, next) => {
   res.locals.messages = require("express-messages")(req, res)
   next()
 })
 
+/* ======================
+ * Body parsers
+ * ====================== */
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-
-
-// View engine + layouts
+/* ======================
+ * View engine + layouts
+ * ====================== */
 app.set("view engine", "ejs")
 app.use(expressLayouts)
 app.set("layout", "./layouts/layout")
+app.use(utilities.checkJWTToken)
 
-// Static routes (assets + /cause-error)
+/* ======================
+ * Archivos estáticos y /cause-error
+ * ====================== */
 app.use(staticRoutes)
 
-// Home (wrapped)
+/* =======================================================
+ * ✅ Verificar JWT de la cookie y exponer datos a las vistas
+ *    - Si es válido: res.locals.accountData y res.locals.loggedin = 1
+ *    - Si no hay cookie o es inválido: sigue sin romper el flujo
+ * ======================================================= */
+
+/* ======================
+ * Rutas principales
+ * ====================== */
 app.get("/", utilities.handleErrors(baseController.buildHome))
-
-// Inventory routes
 app.use("/inv", inventoryRoute)
-
-// Account routes
 app.use("/account", accountRoute)
+app.get("/logout", utilities.handleErrors(accountController.logout))
 
-/* ***********************
- * 404 → forward to error handler
- *************************/
+/* ======================
+ * 404
+ * ====================== */
 app.use((req, res, next) => {
   next({ status: 404, message: "The page you requested was not found." })
 })
 
-/* ***********************
- * Global Error Handler (500/404)
- *************************/
+/* ======================
+ * Global Error Handler
+ * ====================== */
 app.use(async (err, req, res, next) => {
   try {
     const status = err.status || 500
     const nav = await utilities.getNav(req)
 
-    // Log server-side
     console.error(
       `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${status} | ${err.message}`
     )
@@ -86,14 +101,12 @@ app.use(async (err, req, res, next) => {
       })
     }
 
-    // Default: 500
     return res.status(500).render("errors/500", {
       title: "500 Server Error",
       nav,
       message: "Oh no! There was a crash. Please try again later.",
     })
   } catch (renderErr) {
-    // Fallback ultra-defensivo
     console.error("Error while rendering error view:", renderErr)
     res.status(500).send("Server Error")
   }

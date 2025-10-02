@@ -3,8 +3,16 @@
     <h1 class="siteName">
       <a href="/" title="Return to home page">CSE Motors</a>
     </h1>
+
     <nav aria-label="account tools" class="tools">
+    <% if (typeof loggedin !== 'undefined' && loggedin) { %>
+      <span>Welcome, <%= (accountData && accountData.account_firstname) ? accountData.account_firstname : 'User' %>!</span>
+      <a href="/account" title="Manage your account">My Account</a>
+      <a href="/account/logout" title="Log out">Logout</a>
+    <% } else { %>
       <a href="/account/login" title="Click to log in">My Account</a>
-    </nav>
+    <% } %>
+  </nav>
+
   </div>
 </header>

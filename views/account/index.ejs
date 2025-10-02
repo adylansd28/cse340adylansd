@@ -1,0 +1,7 @@
+<h1>My Account</h1>
+<a href="/logout">Logout</a>
+<p>Welcome, <strong>
+  <%= (accountData && accountData.account_firstname) 
+      || (account && account.account_firstname) 
+      || "User" %>
+</strong>!</p>

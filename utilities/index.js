@@ -1,4 +1,9 @@
+// utilities/index.js
 const invModel = require("../models/inventory-model")
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
+const COOKIE_NAME = process.env.COOKIE_NAME || "jwt"
+
 const Util = {}
 
 /* ************************
@@ -24,10 +29,18 @@ Util.getNav = async function (req) {
     list += `<li><a href="${href}" title="See our inventory of ${row.classification_name} vehicles"${isActive ? ' class="active" aria-current="page"' : ""}>${row.classification_name}</a></li>`
   })
 
+  // My Account (dinámico: login vs no login)
+  if (req?.res?.locals?.loggedin) {
+    const isAccount = current === "/account"
+    list += `<li><a href="/account" title="Manage your account"${isAccount ? ' class="active" aria-current="page"' : ""}>My Account</a></li>`
+  } else {
+    const isLogin = current === "/account/login"
+    list += `<li><a href="/account/login" title="Login to your account"${isLogin ? ' class="active" aria-current="page"' : ""}>My Account</a></li>`
+  }
+
   list += "</ul>"
   return list
 }
-
 
 /* **************************************
  * Build the classification grid HTML
@@ -129,7 +142,6 @@ Util.buildClassificationList = async function (classification_id = null) {
   return html
 }
 
-
 /* **************************************
  * Format helpers
  ************************************ */
@@ -150,5 +162,60 @@ Util.handleErrors =
   (fn) =>
   (req, res, next) =>
     Promise.resolve(fn(req, res, next)).catch(next)
+
+/* ****************************************
+ * Paso 7: Middleware para verificar JWT en la cookie
+ * - Si existe y es válido → expone accountData y loggedin=1
+ * - Si existe y es inválido/expiró → limpia cookie, loggedin=0
+ * - Si no existe → continúa sin romper páginas públicas
+ **************************************** */
+
+/* ****************************************
+ * Middleware to check token validity
+ **************************************** */
+Util.checkJWTToken = (req, res, next) => {
+  const { cookies = {} } = req
+  const token = cookies[COOKIE_NAME] // 👈 usa el nombre unificado
+
+  if (token) {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, accountData) => {
+      if (err) {
+        // token inválido => limpia y pide login
+        res.clearCookie(COOKIE_NAME)
+        // no uses flash aquí si no estás seguro de la sesión
+        return res.redirect("/account/login")
+      }
+      res.locals.accountData = accountData
+      res.locals.loggedin = 1
+      return next()
+    })
+  } else {
+    return next()
+  }
+}
+
+/* ****************************************
+ * (Opcional) Guard para proteger rutas privadas
+ * Úsalo en rutas que requieran sesión:
+ *   router.get("/account", Util.requireAuth, controller.buildAccount)
+ **************************************** */
+Util.requireAuth = (req, res, next) => {
+  if (res.locals?.loggedin === 1 && res.locals?.accountData) return next()
+  req.flash("notice", "Please log in.")
+  return res.redirect("/account/login")
+}
+
+/* ****************************************
+ *  Check Login
+ * ************************************ */
+Util.checkLogin = (req, res, next) => {
+  if (res.locals.loggedin) {
+    next()
+  } else {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
+}
+
 
 module.exports = Util

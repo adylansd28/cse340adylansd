@@ -1,8 +1,11 @@
+// validations/inv-validation.js
 const utilities = require(".")
 const { body, validationResult } = require("express-validator")
 const invValidate = {}
 
-/* ---------- Reglas: Classification ---------- */
+/* ============================
+ * Reglas: Classification
+ * ============================ */
 invValidate.classificationRules = () => [
   body("classification_name")
     .trim().escape()
@@ -13,7 +16,7 @@ invValidate.classificationRules = () => [
 invValidate.checkClassificationData = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    const nav = await utilities.getNav()
+    const nav = await utilities.getNav(req)
     return res.status(400).render("inventory/add-classification", {
       title: "Add Classification",
       nav,
@@ -24,7 +27,9 @@ invValidate.checkClassificationData = async (req, res, next) => {
   next()
 }
 
-/* ---------- Reglas: Inventory ---------- */
+/* ============================
+ * Reglas: Inventory (Add/Update)
+ * ============================ */
 invValidate.inventoryRules = () => [
   body("inv_make")
     .trim().escape()
@@ -44,11 +49,13 @@ invValidate.inventoryRules = () => [
   body("inv_image")
     .trim()
     .notEmpty().withMessage("Image path is required.")
-    .matches(/^\/images\/vehicles\/.+|^https?:\/\/.+/).withMessage("Provide a valid image path or URL."),
+    .matches(/^(?:\/images\/vehicles\/.+|https?:\/\/.+)$/)
+    .withMessage("Provide a valid image path or URL."),
   body("inv_thumbnail")
     .trim()
     .notEmpty().withMessage("Thumbnail path is required.")
-    .matches(/^\/images\/vehicles\/.+|^https?:\/\/.+/).withMessage("Provide a valid thumbnail path or URL."),
+    .matches(/^(?:\/images\/vehicles\/.+|https?:\/\/.+)$/)
+    .withMessage("Provide a valid thumbnail path or URL."),
   body("inv_price")
     .notEmpty().withMessage("Price is required.")
     .isFloat({ min: 0 }).withMessage("Price must be a positive number."),
@@ -65,10 +72,16 @@ invValidate.inventoryRules = () => [
     .matches(/^[A-Za-z]+(?:\s[A-Za-z]+)*$/).withMessage("Color must be alphabetic."),
 ]
 
+// Alias usado por la ruta para "add" o "update"
+invValidate.newInventoryRules = invValidate.inventoryRules
+
+/* ============================
+ * Check: Add Inventory
+ * ============================ */
 invValidate.checkInventoryData = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    const nav = await utilities.getNav()
+    const nav = await utilities.getNav(req)
     const classificationList = await utilities.buildClassificationList(req.body.classification_id)
     return res.status(400).render("inventory/add-inventory", {
       title: "Add Inventory",
@@ -85,6 +98,40 @@ invValidate.checkInventoryData = async (req, res, next) => {
       inv_year: req.body.inv_year,
       inv_miles: req.body.inv_miles,
       inv_color: req.body.inv_color,
+      classification_id: req.body.classification_id,
+    })
+  }
+  next()
+}
+
+/* ============================
+ * Check: Update Inventory (Step 2)
+ * ============================ */
+invValidate.checkUpdateData = async (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    const nav = await utilities.getNav(req)
+    const classificationList = await utilities.buildClassificationList(req.body.classification_id)
+    const itemName = `${req.body.inv_make || "Vehicle"} ${req.body.inv_model || ""}`.trim()
+
+    return res.status(400).render("inventory/edit-inventory", {
+      title: `Edit ${itemName}`,
+      nav,
+      classificationList,
+      errors,
+      // necesario para el update
+      inv_id: req.body.inv_id,
+      // stickiness
+      inv_make: req.body.inv_make,
+      inv_model: req.body.inv_model,
+      inv_description: req.body.inv_description,
+      inv_image: req.body.inv_image,
+      inv_thumbnail: req.body.inv_thumbnail,
+      inv_price: req.body.inv_price,
+      inv_year: req.body.inv_year,
+      inv_miles: req.body.inv_miles,
+      inv_color: req.body.inv_color,
+      classification_id: req.body.classification_id,
     })
   }
   next()

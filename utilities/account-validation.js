@@ -1,36 +1,49 @@
-const utilities = require(".")
+const utilities = require(".") // asumiendo que utilities/index.js exporta getNav
 const { body, validationResult } = require("express-validator")
-const validate = {}
 const accountModel = require("../models/account-model")
+
+const validate = {}
 
 /* **********************************
  *  Registration Data Validation Rules
  * ********************************* */
-validate.registationRules = () => {
+validate.registrationRules = () => {
   return [
     body("account_firstname")
-      .trim().escape().notEmpty().isLength({ min: 1 })
-      .withMessage("Please provide a first name."),
+      .trim()
+      .escape()
+      .notEmpty().withMessage("Please provide a first name.")
+      .bail()
+      .isLength({ min: 1 }),
 
     body("account_lastname")
-      .trim().escape().notEmpty().isLength({ min: 2 })
-      .withMessage("Please provide a last name."),
+      .trim()
+      .escape()
+      .notEmpty().withMessage("Please provide a last name.")
+      .bail()
+      .isLength({ min: 2 }),
 
     // valid email is required and cannot already exist in the database
     body("account_email")
       .trim()
-      .isEmail()
+      .isEmail().withMessage("A valid email is required.")
+      .bail()
       .normalizeEmail()
-      .withMessage("A valid email is required.")
       .custom(async (account_email) => {
         const exists = await accountModel.checkExistingEmail(account_email)
         if (exists) {
-          throw new Error("Email exists. Please log in or use different email")
+          throw new Error("Email exists. Please log in or use a different email.")
         }
       }),
 
     body("account_password")
-      .trim().notEmpty().isStrongPassword({
+      .trim()
+      .notEmpty().withMessage("Password is required.")
+      .bail()
+      // sin espacios (coincide con tu pattern de register.ejs)
+      .matches(/^\S+$/).withMessage("Password cannot contain spaces.")
+      .bail()
+      .isStrongPassword({
         minLength: 12,
         minLowercase: 1,
         minUppercase: 1,
@@ -64,15 +77,18 @@ validate.checkRegData = async (req, res, next) => {
 
 /* **********************************
  *  Login Data Validation Rules
+ *  (solo requeridos, sin complejidad)
  * ********************************* */
 validate.loginRules = () => {
   return [
     body("account_email")
-      .trim().isEmail().normalizeEmail()
-      .withMessage("A valid email is required."),
+      .trim()
+      .isEmail().withMessage("A valid email is required.")
+      .bail()
+      .normalizeEmail(),
     body("account_password")
-      .trim().notEmpty()
-      .withMessage("Password is required."),
+      .trim()
+      .notEmpty().withMessage("Password is required."),
   ]
 }
 

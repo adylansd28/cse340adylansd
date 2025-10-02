@@ -1,0 +1,129 @@
+<main id="edit-inventory-view" class="narrow">
+  <h1><%= title %></h1>
+
+  <!-- Flash messages -->
+  <%- messages() %>
+
+  <!-- Validation errors -->
+  <% if (errors) { %>
+    <ul class="notice">
+      <% (errors.array ? errors.array() : errors).forEach(e => { %>
+        <li><%= e.msg %></li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <% const maxYear = new Date().getFullYear() + 1; %>
+
+  <!-- Edit Inventory form -->
+  <form id="updateForm" action="/inv/update" method="post" novalidate>
+    <!-- Hidden field to keep track of which vehicle we’re editing -->
+    <input type="hidden" name="inv_id" value="<%= inv_id %>">
+
+    <div class="field">
+      <label for="inv_make">Make</label>
+      <input
+        type="text"
+        name="inv_make"
+        id="inv_make"
+        required
+        pattern="^[A-Za-z0-9][A-Za-z0-9\\s\\-]{1,}$"
+        value="<%= typeof inv_make !== 'undefined' ? inv_make : '' %>">
+    </div>
+
+    <div class="field">
+      <label for="inv_model">Model</label>
+      <input
+        type="text"
+        name="inv_model"
+        id="inv_model"
+        required
+        pattern="^[A-Za-z0-9][A-Za-z0-9\\s\\-]{1,}$"
+        value="<%= typeof inv_model !== 'undefined' ? inv_model : '' %>">
+    </div>
+
+    <div class="field">
+      <label for="classification_id">Classification</label>
+      <%- classificationSelect %>
+    </div>
+
+    <div class="field">
+      <label for="inv_description">Description</label>
+      <textarea
+        name="inv_description"
+        id="inv_description"
+        required
+        minlength="10"><%= typeof inv_description !== 'undefined' ? inv_description : '' %></textarea>
+    </div>
+
+    <div class="field">
+      <label for="inv_image">Image Path</label>
+      <input
+        type="text"
+        name="inv_image"
+        id="inv_image"
+        value="<%= typeof inv_image !== 'undefined' ? inv_image : '/images/vehicles/no-image.png' %>">
+    </div>
+
+    <div class="field">
+      <label for="inv_thumbnail">Thumbnail Path</label>
+      <input
+        type="text"
+        name="inv_thumbnail"
+        id="inv_thumbnail"
+        value="<%= typeof inv_thumbnail !== 'undefined' ? inv_thumbnail : '/images/vehicles/no-image-tn.png' %>">
+    </div>
+
+    <div class="field">
+      <label for="inv_price">Price</label>
+      <input
+        type="number"
+        name="inv_price"
+        id="inv_price"
+        step="0.01"
+        min="0"
+        required
+        value="<%= typeof inv_price !== 'undefined' ? inv_price : '' %>">
+    </div>
+
+    <div class="field">
+      <label for="inv_year">Year</label>
+      <input
+        type="number"
+        name="inv_year"
+        id="inv_year"
+        required
+        min="1886"
+        max="<%= maxYear %>"
+        value="<%= typeof inv_year !== 'undefined' ? inv_year : '' %>">
+    </div>
+
+    <div class="field">
+      <label for="inv_miles">Miles</label>
+      <input
+        type="number"
+        name="inv_miles"
+        id="inv_miles"
+        required
+        min="0"
+        step="1"
+        value="<%= typeof inv_miles !== 'undefined' ? inv_miles : '' %>">
+    </div>
+
+    <div class="field">
+      <label for="inv_color">Color</label>
+      <input
+        type="text"
+        name="inv_color"
+        id="inv_color"
+        required
+        pattern="^[A-Za-z]+(?:\\s[A-Za-z]+)*$"
+        value="<%= typeof inv_color !== 'undefined' ? inv_color : '' %>">
+    </div>
+
+    <button type="submit" class="btn" disabled>Update Vehicle</button>
+  </form>
+
+  <!-- Link to JS that enables button only if form changes -->
+  <script src="/js/inv-update.js"></script>
+</main>
