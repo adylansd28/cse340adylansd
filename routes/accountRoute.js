@@ -33,18 +33,41 @@ router.post(
   "/login",
   regValidate.loginRules(),
   regValidate.checkLoginData,
-  utilities.handleErrors(accountController.accountLogin) // <- nombre correcto
+  utilities.handleErrors(accountController.accountLogin)
 )
 
 /* ***************
- *  Process Logout
+ *  Logout
  * *************** */
-router.post(
-  "/logout",
-  utilities.handleErrors(accountController.logoutAccount)
+router.get("/logout", utilities.handleErrors(accountController.logout))
+
+/* ***************
+ *  Update Account Info (GET view)
+ * *************** */
+router.get(
+  "/update/:account_id",
+  utilities.checkLogin,
+  utilities.handleErrors(accountController.buildUpdateAccount)
 )
 
-// routes/accountRoute.js
-router.get("/logout", utilities.handleErrors(accountController.logout))
+/* ***************
+ *  Update Account Info (POST)
+ * *************** */
+router.post(
+  "/update",
+  regValidate.updateAccountRules(),
+  regValidate.checkUpdateData,
+  utilities.handleErrors(accountController.updateAccount)
+)
+
+/* ***************
+ *  Update Password (POST)
+ * *************** */
+router.post(
+  "/update-password",
+  regValidate.passwordRules(),
+  regValidate.checkPasswordData,
+  utilities.handleErrors(accountController.updatePassword)
+)
 
 module.exports = router

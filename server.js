@@ -12,6 +12,7 @@ const accountRoute = require("./routes/accountRoute")
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 const accountController = require("./controllers/accountController")
+const auth = require("./utilities/auth-middleware")
 
 const app = express()
 const PORT = process.env.PORT || 5500
@@ -21,6 +22,7 @@ const HOST = "0.0.0.0"
  * Cookies httpOnly
  * ====================== */
 app.use(cookieParser())
+app.use(auth.injectAuth)
 
 /* ======================
  * Session & flash msgs

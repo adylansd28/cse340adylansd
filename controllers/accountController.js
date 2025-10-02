@@ -38,7 +38,7 @@ async function registerAccount(req, res) {
   const nav = await utilities.getNav(req)
   const { account_firstname, account_lastname, account_email, account_password } = req.body
 
-  // 1) Hash password
+  // Hash password
   let hashedPassword
   try {
     hashedPassword = await bcrypt.hash(account_password, 10)
@@ -54,7 +54,7 @@ async function registerAccount(req, res) {
     })
   }
 
-  // 2) Save user
+  // Save user
   const regResult = await accountModel.registerAccount(
     account_firstname,
     account_lastname,
@@ -90,7 +90,7 @@ async function accountLogin(req, res) {
   const { account_email, account_password } = req.body
 
   try {
-    // 1) Buscar usuario por email
+    // Buscar usuario por email
     const user = await accountModel.getAccountByEmail(account_email)
     if (!user) {
       req.flash("notice", "Please check your credentials and try again.")
@@ -102,7 +102,7 @@ async function accountLogin(req, res) {
       })
     }
 
-    // 2) Verificar contraseña
+    // Verificar contraseña
     const ok = await bcrypt.compare(account_password, user.account_password)
     if (!ok) {
       req.flash("notice", "Please check your credentials and try again.")
@@ -114,7 +114,7 @@ async function accountLogin(req, res) {
       })
     }
 
-    // 3) Payload + JWT
+    // Payload + JWT
     const payload = {
       account_id: user.account_id,
       account_firstname: user.account_firstname || "",
@@ -125,17 +125,17 @@ async function accountLogin(req, res) {
 
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
 
-    // 4) Set cookie consistente con COOKIE_NAME
+    // Set cookie
     const isDev = process.env.NODE_ENV === "development"
     const cookieOpts = {
       httpOnly: true,
-      maxAge: 3600 * 1000, // 1 hora
+      maxAge: 3600 * 1000, // 1h
       ...(isDev ? {} : { secure: true, sameSite: "lax" }),
       path: "/",
     }
     res.cookie(COOKIE_NAME, accessToken, cookieOpts)
 
-    // 5) Redirección a /account
+    // Redirección a /account (el middleware poblará res.locals.accountData)
     return res.redirect("/account/")
   } catch (err) {
     console.error("Login error:", err)
@@ -150,8 +150,7 @@ async function accountLogin(req, res) {
 }
 
 /* ****************************************
-*  Logout simple: limpiar solo JWT y volver a login
-*  (si usas esta ruta: /account/logout)
+*  Logout (limpia JWT y redirige a login)
 * *************************************** */
 function logoutAccount(req, res) {
   const isDev = process.env.NODE_ENV === "development"
@@ -164,6 +163,34 @@ function logoutAccount(req, res) {
 }
 
 /* ****************************************
+*  Logout completo (JWT + session) → home
+* *************************************** */
+function logout(req, res) {
+  try {
+    const isDev = process.env.NODE_ENV === "development"
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      ...(isDev ? {} : { secure: true, sameSite: "lax" }),
+      path: "/",
+    })
+
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) console.error("Session destroy error:", err)
+        res.clearCookie("sessionId")
+        res.clearCookie("jwt")
+        return res.redirect("/")
+      })
+    } else {
+      return res.redirect("/")
+    }
+  } catch (e) {
+    console.error("Logout error:", e)
+    return res.redirect("/")
+  }
+}
+
+/* ****************************************
 *  Account Management view
 * *************************************** */
 async function buildAccountManagement(req, res) {
@@ -173,43 +200,209 @@ async function buildAccountManagement(req, res) {
     req.flash("notice", "Please log in.")
     return res.redirect("/account/login")
   }
+
   return res.render("account/index", {
     title: "Account Management",
     nav,
     errors: null,
     account,
-    accountData: account, // alias por compatibilidad
+    accountData: account, // para EJS parciales (header.ejs)
     loggedin: 1,
   })
 }
 
 /* ****************************************
-*  Logout completo: limpia JWT + destruye sesión y vuelve a /
-*  (si usas /account/logout o /logout)
+*  Build Update Account view (GET /account/update/:account_id)
 * *************************************** */
-function logout(req, res) {
-  try {
-    // Limpia JWT
-    const isDev = process.env.NODE_ENV === "development"
-    res.clearCookie(COOKIE_NAME, {
-      httpOnly: true,
-      ...(isDev ? {} : { secure: true, sameSite: "lax" }),
-      path: "/",
-    })
+async function buildUpdateView(req, res) {
+  const nav = await utilities.getNav(req)
+  const { account_id } = req.params
 
-    // Destruye la sesión si existe y limpia cookie de sesión
-    if (req.session) {
-      req.session.destroy((err) => {
-        if (err) console.error("Session destroy error:", err)
-        res.clearCookie("sessionId") // usa el nombre real que diste a la cookie de sesión
-        return res.redirect("/")
-      })
+  // Seguridad básica: solo el dueño o admin/employee puede acceder
+  const me = res.locals?.accountData
+  if (!me) {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
+  const isSelf = String(me.account_id) === String(account_id)
+  const isPrivileged = me.account_type === "Employee" || me.account_type === "Admin"
+  if (!isSelf && !isPrivileged) {
+    req.flash("notice", "Not authorized.")
+    return res.redirect("/account/")
+  }
+
+  const user = await accountModel.getAccountById(account_id)
+  if (!user) {
+    req.flash("notice", "Account not found.")
+    return res.redirect("/account/")
+  }
+
+  return res.render("account/update", {
+    title: "Update Account",
+    nav,
+    errors: null,
+    // sticky values
+    account_id: user.account_id,
+    account_firstname: user.account_firstname,
+    account_lastname: user.account_lastname,
+    account_email: user.account_email,
+  })
+}
+
+/* ****************************************
+*  Update account info (POST /account/update)
+* *************************************** */
+async function updateAccount(req, res) {
+  const nav = await utilities.getNav(req)
+  const { account_id, account_firstname, account_lastname, account_email } = req.body
+
+  // Seguridad básica
+  const me = res.locals?.accountData
+  if (!me) {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
+  const isSelf = String(me.account_id) === String(account_id)
+  const isPrivileged = me.account_type === "Employee" || me.account_type === "Admin"
+  if (!isSelf && !isPrivileged) {
+    req.flash("notice", "Not authorized.")
+    return res.redirect("/account/")
+  }
+
+  // Validaciones simples
+  if (!account_firstname || !account_lastname || !account_email) {
+    req.flash("notice", "All fields are required.")
+    return res.status(400).render("account/update", {
+      title: "Update Account",
+      nav,
+      errors: null,
+      account_id,
+      account_firstname,
+      account_lastname,
+      account_email,
+    })
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(account_email)) {
+    req.flash("notice", "Please enter a valid email address.")
+    return res.status(400).render("account/update", {
+      title: "Update Account",
+      nav,
+      errors: null,
+      account_id,
+      account_firstname,
+      account_lastname,
+      account_email,
+    })
+  }
+
+  try {
+    const result = await accountModel.updateAccountInfo(
+      account_id,
+      account_firstname,
+      account_lastname,
+      account_email
+    )
+
+    if (result && (result.rowCount === 1 || result.rows?.length === 1)) {
+      req.flash("notice", "Account information updated successfully.")
+      return res.redirect("/account/")
     } else {
-      return res.redirect("/")
+      req.flash("notice", "Update failed. Please try again.")
+      return res.status(500).render("account/update", {
+        title: "Update Account",
+        nav,
+        errors: null,
+        account_id,
+        account_firstname,
+        account_lastname,
+        account_email,
+      })
     }
-  } catch (e) {
-    console.error("Logout error:", e)
-    return res.redirect("/")
+  } catch (err) {
+    console.error("Update account error:", err)
+    req.flash("notice", "An error occurred while updating the account.")
+    return res.status(500).render("account/update", {
+      title: "Update Account",
+      nav,
+      errors: null,
+      account_id,
+      account_firstname,
+      account_lastname,
+      account_email,
+    })
+  }
+}
+
+/* ****************************************
+*  Update password (POST /account/update-password)
+* *************************************** */
+async function updatePassword(req, res) {
+  const nav = await utilities.getNav(req)
+  const { account_id, account_password } = req.body
+
+  // Seguridad básica
+  const me = res.locals?.accountData
+  if (!me) {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
+  const isSelf = String(me.account_id) === String(account_id)
+  const isPrivileged = me.account_type === "Employee" || me.account_type === "Admin"
+  if (!isSelf && !isPrivileged) {
+    req.flash("notice", "Not authorized.")
+    return res.redirect("/account/")
+  }
+
+  // Validación simple de password (puedes alinear con tu validator)
+  if (!account_password || account_password.length < 8) {
+    req.flash("notice", "Password must be at least 8 characters.")
+    // Volver a la vista con datos mínimos para no perder el contexto
+    const user = await accountModel.getAccountById(account_id)
+    return res.status(400).render("account/update", {
+      title: "Update Account",
+      nav,
+      errors: null,
+      account_id,
+      account_firstname: user?.account_firstname || "",
+      account_lastname: user?.account_lastname || "",
+      account_email: user?.account_email || "",
+    })
+  }
+
+  try {
+    const hashed = await bcrypt.hash(account_password, 10)
+    const result = await accountModel.updatePassword(account_id, hashed)
+
+    if (result && (result.rowCount === 1 || result.rows?.length === 1)) {
+      req.flash("notice", "Password updated successfully.")
+      return res.redirect("/account/")
+    } else {
+      req.flash("notice", "Password update failed. Please try again.")
+      const user = await accountModel.getAccountById(account_id)
+      return res.status(500).render("account/update", {
+        title: "Update Account",
+        nav,
+        errors: null,
+        account_id,
+        account_firstname: user?.account_firstname || "",
+        account_lastname: user?.account_lastname || "",
+        account_email: user?.account_email || "",
+      })
+    }
+  } catch (err) {
+    console.error("Update password error:", err)
+    req.flash("notice", "An error occurred while updating the password.")
+    const user = await accountModel.getAccountById(account_id)
+    return res.status(500).render("account/update", {
+      title: "Update Account",
+      nav,
+      errors: null,
+      account_id,
+      account_firstname: user?.account_firstname || "",
+      account_lastname: user?.account_lastname || "",
+      account_email: user?.account_email || "",
+    })
   }
 }
 
@@ -225,4 +418,7 @@ module.exports = {
   buildAccountManagement,
   buildManagement, // alias
   logout,
+  buildUpdateView,
+  updateAccount,
+  updatePassword,
 }

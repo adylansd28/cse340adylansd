@@ -1,7 +1,17 @@
-<h1>My Account</h1>
-<a href="/logout">Logout</a>
-<p>Welcome, <strong>
-  <%= (accountData && accountData.account_firstname) 
-      || (account && account.account_firstname) 
-      || "User" %>
-</strong>!</p>
+<main id="account-management-view" class="narrow">
+  <h1>Account Management</h1>
+
+  <h2>Welcome <%= account.account_firstname %></h2>
+
+  <!-- Siempre visible -->
+  <p>
+    <a href="/account/update/<%= account.account_id %>" class="btn">
+      Update Account Info
+    </a>
+  </p>
+
+  <% if (account.account_type === "Employee" || account.account_type === "Admin") { %>
+    <h3>Inventory Management</h3>
+    <a href="/inv/management" class="btn">Go to Inventory Management</a>
+  <% } %>
+</main>

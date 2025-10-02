@@ -21,7 +21,6 @@ async function registerAccount(account_firstname, account_lastname, account_emai
 
 /* **********************
  *   Check for existing email
- *   Devuelve boolean (true si existe)
  * ********************* */
 async function checkExistingEmail(account_email) {
   const sql = "SELECT 1 FROM account WHERE account_email = $1 LIMIT 1"
@@ -31,10 +30,10 @@ async function checkExistingEmail(account_email) {
 
 /* **********************
  *   Get account by email (para login)
- *   Devuelve una fila o null
  * ********************* */
 async function getAccountByEmail(account_email) {
-  const sql = `SELECT 
+  const sql = `
+    SELECT 
        account_id,
        account_firstname,
        account_lastname,
@@ -48,7 +47,7 @@ async function getAccountByEmail(account_email) {
 }
 
 /* **********************
- *   (Opcional) Get account by id (para /profile, etc.)
+ *   Get account by id (para update y profile)
  * ********************* */
 async function getAccountById(account_id) {
   const sql = `
@@ -65,9 +64,45 @@ async function getAccountById(account_id) {
   return result.rows[0] || null
 }
 
+/* **********************
+ *   Update account info (firstname, lastname, email)
+ * ********************* */
+async function updateAccountInfo(account_id, account_firstname, account_lastname, account_email) {
+  const sql = `
+    UPDATE account
+    SET 
+      account_firstname = $2,
+      account_lastname = $3,
+      account_email = $4
+    WHERE account_id = $1
+    RETURNING account_id, account_firstname, account_lastname, account_email, account_type`
+  const result = await pool.query(sql, [
+    account_id,
+    account_firstname,
+    account_lastname,
+    account_email,
+  ])
+  return result
+}
+
+/* **********************
+ *   Update account password
+ * ********************* */
+async function updatePassword(account_id, hashedPassword) {
+  const sql = `
+    UPDATE account
+    SET account_password = $2
+    WHERE account_id = $1
+    RETURNING account_id`
+  const result = await pool.query(sql, [account_id, hashedPassword])
+  return result
+}
+
 module.exports = {
   registerAccount,
   checkExistingEmail,
   getAccountByEmail,
   getAccountById,
+  updateAccountInfo,
+  updatePassword,
 }

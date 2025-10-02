@@ -5,14 +5,14 @@
     </h1>
 
     <nav aria-label="account tools" class="tools">
-    <% if (typeof loggedin !== 'undefined' && loggedin) { %>
-      <span>Welcome, <%= (accountData && accountData.account_firstname) ? accountData.account_firstname : 'User' %>!</span>
-      <a href="/account" title="Manage your account">My Account</a>
-      <a href="/account/logout" title="Log out">Logout</a>
-    <% } else { %>
-      <a href="/account/login" title="Click to log in">My Account</a>
-    <% } %>
-  </nav>
-
+      <% if (typeof loggedin !== 'undefined' && loggedin) { %>
+        <a href="/account" title="Go to your account">
+          Welcome, <%= (accountData && accountData.account_firstname) ? accountData.account_firstname : 'User' %>
+        </a>
+        <a href="/account/logout" title="Log out">Logout</a>
+      <% } else { %>
+        <a href="/account/login" title="Click to log in">My Account</a>
+      <% } %>
+    </nav>
   </div>
 </header>

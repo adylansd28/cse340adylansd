@@ -15,8 +15,8 @@ router.get(
   "/",
   utilities.handleErrors(invController.buildManagement)
 )
-router.get(
-  "/management",
+router.get("/management",
+  auth.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildManagement)
 )
 
@@ -39,37 +39,37 @@ router.get(
 /* ***************************
  * Add Classification (GET form)
  * ************************* */
-router.get(
-  "/add-classification",
+router.get("/add-classification",
+  auth.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildAddClassification)
 )
 
 /* ***************************
  * Add Classification (POST submit)
  * ************************* */
-router.post(
-  "/add-classification",
+router.post("/add-classification",
+  auth.requireEmployeeOrAdmin,
   invValidate.classificationRules(),
   invValidate.checkClassificationData,
-  utilities.handleErrors(invController.registerClassification)
+  utilities.handleErrors(invController.addClassification)
 )
 
 /* ***************************
  * Add Inventory (GET form)
  * ************************* */
-router.get(
-  "/add-inventory",
+router.get("/add-inventory",
+  auth.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildAddInventory)
 )
 
 /* ***************************
  * Add Inventory (POST submit)
  * ************************* */
-router.post(
-  "/add-inventory",
+router.post("/add-inventory",
+  auth.requireEmployeeOrAdmin,
   invValidate.inventoryRules(),
   invValidate.checkInventoryData,
-  utilities.handleErrors(invController.registerInventory)
+  utilities.handleErrors(invController.addInventory)
 )
 
 /* ***************************
@@ -83,36 +83,34 @@ router.get(
 /* ***************************
  * Edit inventory view
  * ************************* */
-router.get(
-  "/edit/:inv_id",
-  utilities.handleErrors(
-    invController.buildEditInventory // nombre canónico
-  )
+router.get("/edit/:inv_id",
+  auth.requireEmployeeOrAdmin,
+  utilities.handleErrors(invController.buildEditInventory)
 )
 
 /* ***************************
  * Update inventory (POST action)
  * ************************* */
-router.post(
-  "/update",
-  invValidate.newInventoryRules(),
-  invValidate.checkUpdateData,
+router.post("/update",
+  auth.requireEmployeeOrAdmin,
+  invValidate.inventoryRules(),
+  invValidate.checkInventoryData,
   utilities.handleErrors(invController.updateInventory)
 )
 
 /* ***************************
  * Delete inventory (Confirm view)
  * ************************* */
-router.get(
-  "/delete/:inv_id",
+router.get("/delete/:inv_id",
+  auth.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.buildDeleteConfirm)
 )
 
 /* ***************************
  * Delete inventory (POST action)
  * ************************* */
-router.post(
-  "/delete",
+router.post("/delete",
+  auth.requireEmployeeOrAdmin,
   utilities.handleErrors(invController.deleteInventory)
 )
 
